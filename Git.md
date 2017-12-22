@@ -223,6 +223,9 @@ $ git commit --amend
   `git reset --mixed `  指针指向回退的提交，修改的信息变成 untracking
 
 
+#### 中文乱码处理
+
+`git config --global core.quotepath false`
 
 ## 四、远程仓库
 
