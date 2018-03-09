@@ -362,7 +362,7 @@ git branch -d feature-apt
 
 #### 已经提交的commit, 从一个分支放到另一个分支
 
-```
+```shell
 git cherry-pick <commit_id>
 
 git checkout uat

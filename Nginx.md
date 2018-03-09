@@ -295,3 +295,4 @@ upstream test {
 - https://github.com/Homebrew/homebrew-nginx
 - https://segmentfault.com/a/1190000002797606
 - http://www.cnblogs.com/pycode/p/6588896.html
+- https://zhongwuzw.github.io/2016/09/24/%E8%B0%83%E6%95%B4Nginx%E7%9A%84%E7%BD%91%E7%AB%99%E6%A0%B9%E7%9B%AE%E5%BD%95/

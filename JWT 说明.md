@@ -21,7 +21,7 @@ JSON Web Token (JWT), 是为了在网络应用环境间传递声明而执行的�
 
   - JWT 认证
 
-    ![jwt](/Users/dante/Documents/Technique/且行且记/jwt.png)**`
+    ![jwt](/Users/dante/Documents/Technique/且行且记/jwt.png)
 
 - 信息交换：使用 public/private key pairs 签名（sign）保证安全性，将信息通过 payload 进行交换。
 
@@ -129,18 +129,7 @@ $.ajax({
 
   **Spring Boot**
 
-  ```yaml
-  # 配置
-  endpoints:
-    cors:
-      allowed-origins:
-        - http://localhost:8100
-      allowed-methods:
-        - GET
-        - POST
-      allowed-headers:
-        - Authorization
-  ```
+  - 方式1
 
   ```java
   @Configuration
@@ -161,6 +150,33 @@ $.ajax({
           bean.setOrder(0);
           return bean;
       }
+  }
+  ```
+
+  - 方式2
+
+  ```java
+  @Configuration
+  public class MVCConfig extends WebMvcConfigurerAdapter {
+  	@Override
+  	public void addCorsMappings(CorsRegistry registry) {
+  		registry.addMapping("/**");	// 表示全路径跨域
+  	}	
+  }
+  ```
+
+  - 方式3
+
+    局部控制，在类或方法上添加注解 @CrossOrigin。
+
+  ```java
+  /**
+   * origins 默认是 *
+   */
+  @CrossOrigin(origins = "http://localhost:8080")
+  @GetMapping("/query_all")
+  public List<TeacherPO> queryTeachers() {
+      return teacherMapper.queryTeachers();
   }
   ```
 
@@ -235,3 +251,4 @@ $.ajax({
 - https://github.com/jwtk/jjwt
 - https://stackoverflow.com/questions/33921375/zuul-api-gateway-authentication?rq=1
 - https://stackoverflow.com/questions/33921375/zuul-api-gateway-authentication
+- http://www.ruanyifeng.com/blog/2016/04/cors.html
