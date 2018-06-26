@@ -1,4 +1,4 @@
-# Initial page
+# 但丁 - 且行且记
 
-## 加入 Gitbook 
+Welcome to Dante Gitbook !
 
