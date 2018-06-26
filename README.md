@@ -1,4 +1,4 @@
 # Initial page
 
-加入 Gitbook 
+## 加入 Gitbook 
 
