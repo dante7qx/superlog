@@ -8,7 +8,7 @@
 
  - **Broker**：Kafka节点，一个Kafka Node就是一个broker，多个broker组成Kafka集群。
 
-   ![node cluster](/Users/dante/Documents/Technique/且行且记/Kafka/node cluster.png)**设计思想**：
+   ![node cluster](./node cluster.png)**设计思想**：
 
    ​	Kafka  broker集群受Zookeeper的管理。所有的Kafka Broker节点一起去Zookeeper上注册一个临时节点，因为只有一个Kafka Broker会注册成功，其他的都会失败，所以这个成功在Zookeeper上注册临时节点的这个Kafka Broker会成为Kafka Broker Controller，其他的Kafka broker叫Kafka Broker follower。（这个过程叫Controller在ZooKeeper注册Watch）。这个Controller会监听其他的Kafka Broker的所有信息，如果这个kafka broker controller宕机了，在zookeeper上面的那个临时节点就会消失，此时所有的kafka broker又会一起去Zookeeper上注册一个临时节点，因为只有一个Kafka Broker会注册成功，其他的都会失败，所以这个成功在Zookeeper上注册临时节点的这个Kafka Broker会成为Kafka Broker Controller，其他的Kafka broker叫Kafka Broker follower。
 
