@@ -24,7 +24,10 @@
 
 ### 二. Client 和 Server 交互方式
 
-​	所有的交互均是通过Eureka REST API进行的。默认 EurekaClient 使用 Jersey 进行 Http 通信。若要使用 RestTemplate 进行交互（禁用Jersey），则需要进行如下配置
+​	所有的交互均是通过Eureka REST API进行的。默认 EurekaClient 使用 Jersey 进行 Http 通信。若要使用 RestTemplate 进行交互（禁用Jersey），则需要进行如下配置。这样做的好处如下：
+
+	1. 不用考虑 Jersey 的版本冲突问题，Jersey 1.x与2.x并不兼容。
+	2. 减少了项目的依赖。
 
 ```xml
 <dependency>

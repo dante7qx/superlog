@@ -249,6 +249,8 @@ $.ajax({
 - https://jwt.io/introduction/
 - http://www.jianshu.com/p/576dbf44b2ae
 - https://github.com/jwtk/jjwt
+- https://www.jianshu.com/p/6307c89fe3fa?utm_campaign=maleskine&utm_content=note&utm_medium=seo_notes&utm_source=recommendation
 - https://stackoverflow.com/questions/33921375/zuul-api-gateway-authentication?rq=1
 - https://stackoverflow.com/questions/33921375/zuul-api-gateway-authentication
 - http://www.ruanyifeng.com/blog/2016/04/cors.html
+- http://blog.csdn.net/dalangzhonghangxing/article/details/52911230 （处理PreflightRequest）

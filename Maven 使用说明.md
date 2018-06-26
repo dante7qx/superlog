@@ -244,7 +244,9 @@
             <manifest>  
                 <addClasspath>true</addClasspath>  
                 <classpathPrefix>lib/</classpathPrefix>  
-                <mainClass>com.xxx.uploadFile</mainClass>  
+                <mainClass>com.xxx.uploadFile</mainClass>
+                <!-- 打包时 MANIFEST.MF文件不记录的时间戳版本 -->
+                <useUniqueVersions>false</useUniqueVersions>
             </manifest>  
       	</archive>  
     </configuration>  
@@ -301,6 +303,63 @@
     </plugins>
 </reporting>
 ```
+
+##### exec-maven-plugin
+
+- https://blog.csdn.net/bluishglc/article/details/7622286#
+
+对于那些打包成jar包形式的本地java应用来说，通过java命令启动将会是一件极为繁琐的事情，原因很简单，太多的依赖让参数-classpath变得异常的恐怖。
+
+1. 通过工具将工程及其所有依赖的jar包打包成一个独立的jar包（在maven里有两个插件assemly和shade是用来完成这种工作的）。
+2. 编写一个run.bat文件，文件包含一个启动应用的java命令，很显然，这个命令的classpath必须包含全部依赖的jar包。
+
+```xml
+<plugin>  
+    <groupId>org.codehaus.mojo</groupId>  
+    <artifactId>exec-maven-plugin</artifactId>  
+    <version>1.2.1</version>  
+    <executions>  
+        <execution>  
+            <goals>  
+                <goal>java</goal>  
+            </goals>  
+        </execution>  
+    </executions>  
+    <configuration>  
+        <mainClass>com.yourcompany.app.Main</mainClass>  
+    </configuration>  
+</plugin>  
+```
+
+​	java -DsystemProperty1=value1 -DsystemProperty2=value2 -XX:MaxPermSize=256m -classpath .... com.yourcompany.app.Main arg1 arg2
+
+```xml
+<plugin>  
+    <groupId>org.codehaus.mojo</groupId>  
+    <artifactId>exec-maven-plugin</artifactId>  
+    <version>1.2.1</version>  
+    <configuration>  
+        <executable>java</executable> <!-- executable指的是要执行什么样的命令 -->  
+        <arguments>  
+            <argument>-DsystemProperty1=value1</argument> <!-- 这是一个系统属性参数 -->  
+            <argument>-DsystemProperty2=value2</argument> <!-- 这是一个系统属性参数 -->  
+            <argument>-XX:MaxPermSize=256m</argument> <!-- 这是一个JVM参数 -->  
+            <!--automatically creates the classpath using all project dependencies,   
+                also adding the project build directory -->  
+            <argument>-classpath</argument> <!-- 这是classpath属性，其值就是下面的<classpath/> -->  
+            <classpath/> <!-- 这是exec插件最有价值的地方，关于工程的classpath并不需要手动指定，它将由exec自动计算得出 -->  
+            <argument>com.yourcompany.app.Main</argument> <!-- 程序入口，主类名称 -->  
+            <argument>arg1</argument> <!-- 程序的第一个命令行参数 -->  
+            <argument>arg2</argument> <!-- 程序的第二个命令行参数 -->  
+        </arguments>  
+    </configuration>  
+</plugin>  
+<!--
+	执行 mvn exec:exec
+-->
+```
+
+
 
 #### 生产组合
 

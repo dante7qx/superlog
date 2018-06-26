@@ -135,9 +135,9 @@
 - 安装SonarQube插件 ，插件管理中添加。
 
 
--  配置Sonar
+- 配置Sonar
 
-  ![Sonar-Jenkins](/Users/dante/Documents/Technique/且行且记/Sonar-Jenkins.png)
+  ![Sonar-Jenkins](/Users/dante/Documents/Technique/且行且记/Devops/Sonar-Jenkins.png)
 
 - 在pipeline中使用（项目中有sonar-project.properties）
 
@@ -158,7 +158,9 @@
 
 - 获取Sonar扫描结果
 
-  - 使用Sonar API https://sonarqube.com/web_api/
+  - 使用Sonar API  http://localhost:9000/api/webservices/list
+
+    参考：https://docs.sonarqube.org/
 
     ```shell
     !/bin/bash
@@ -179,4 +181,9 @@
     brew install https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64
     ```
 
-    ​
+
+### 5. Sonar系统使用
+
+#### 1）用户、权限
+
+参考：https://blog.csdn.net/danielchan2518/article/details/72792897

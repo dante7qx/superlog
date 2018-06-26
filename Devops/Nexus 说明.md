@@ -102,7 +102,7 @@
 
    ​	**所以自定义构建的仓库组代理仓库的顺序为：Releases，Snapshots，3rd party，Central。也可以使用oschina放到Central前面，下载包会更快。**
 
-   ![Nexus Repo](/Users/dante/Documents/Technique/且行且记/Nexus Repo.png)
+   ![Nexus Repo](/Users/dante/Documents/Technique/且行且记/Devops/Nexus Repo.png)
 
    ​
 

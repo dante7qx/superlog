@@ -80,6 +80,21 @@ zuul.host.max-per-route-connections: 20
 zuul.ribbon-isolation-strategy: SEMAPHORE
 ```
 
+**以下只针对于 Edgware 版本**
+
+当 `zuul.ribbonIsolationStrategy=THREAD`时，Hystrix的线程隔离策略将会作用于所有路由。
+
+此时，`HystrixThreadPoolKey` 默认为“RibbonCommand”。这意味着，所有路由的HystrixCommand都会在相同的Hystrix线程池中执行。
+
+每个路由使用独立的线程池，配置如下
+
+```yaml
+zuul:
+  threadPool:
+    useSeparateThreadPools: true
+    threadPoolKeyPrefix: zuulgw  ## 默认的HystrixThreadPoolkey 将与每个路由的服务标识相同
+```
+
 #### 2. 路由微服务
 
 ```yaml
