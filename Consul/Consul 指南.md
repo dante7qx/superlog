@@ -87,7 +87,32 @@ consul operator raft list-peers
 consul members
 ```
 
-### 四. 配置详解
+### 四. Docker
+
+```shell
+## 1. 拉取 Consul 镜像
+docker pull consul
+
+## 2. 创建集群
+## Leader， -client 0 0 0 0 -ui 使得客户端可以直接通过url访问服务端的consul ui
+docker run -d --name dante-consul-1 -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true}' -v /Users/dante/Documents/Technique/Consul/data/docker/node1:/consul/data -p 8500:8500 consul agent -server -node=dante-consul-1 -bootstrap -client 0.0.0.0 -ui
+
+## 获取 Leader ip
+JOIN_IP="$(docker inspect -f '{{.NetworkSettings.IPAddress}}' dante-consul-1)"
+
+## flower 1
+docker run -d --name dante-consul-2 -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true}' -v /Users/dante/Documents/Technique/Consul/data/docker/node2:/consul/data consul agent -server  -node=dante-consul-2 -client 0.0.0.0 -bootstrap-expect=3 -join $JOIN_IP
+
+## flower 2
+docker run -d --name dante-consul-3 -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true}' -v /Users/dante/Documents/Technique/Consul/data/docker/node3:/consul/data consul agent -server  -node=dante-consul-3 -client 0.0.0.0 -bootstrap-expect=3 -join $JOIN_IP
+
+## 清理
+docker rm $(docker stop dante-consul-1)
+docker rm $(docker stop dante-consul-2)
+docker rm $(docker stop dante-consul-3)
+```
+
+### 五. 配置详解
 
 ```properties
 -bootstrap：用来控制一个server是否在bootstrap模式，在一个datacenter中只能有一个server处于bootstrap模式，当一个server处于bootstrap模式时，可以自己选举为raft leader。
@@ -95,7 +120,7 @@ consul members
 -bootstrap-expect：在一个datacenter中期望提供的server节点数目，当该值提供的时候，consul一直等到达到指定sever数目的时候才会引导整个集群，该标记不能和 bootstrap 公用。
 ```
 
-### 五. SpringCloud集成
+### 六. SpringCloud集成
 
 #### 1. 添加依赖
 
@@ -190,15 +215,21 @@ spring:
           enabled: true		## 监视Consul KV，自动调用 /refresh
 ```
 
-- 建议使用 @ConfigurationProperties 的方式。
+- 建议使用 @ConfigurationProperties 的方式，@Value 无法热更新。
 - Consul 配置如下图
 
 ![consul config 1](./consul config 1.png)
 
 ![consul config 1](./consul config 2.png)
 
-### 六. 参考资料
+### 七. 参考资料
 
 - https://www.consul.io/docs
 - http://chenjumin.iteye.com/blog/2293498
 - https://www.jianshu.com/p/f02df42f7c0c
+- https://hub.docker.com/_/consul/
+- https://www.bitdoom.com/2017/09/07/p125/
+- http://www.cnblogs.com/java-zhao/p/5527779.html
+
+
+
