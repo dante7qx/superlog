@@ -36,6 +36,20 @@ nginx -s reload|reopen|stop|quit   #重新加载配置|重启|快速停止|安�
 nginx -h #帮助
 ```
 
+全局配置（https://www.cnblogs.com/magicsoar/p/5817734.html）
+
+```properties
+daemon on | off   默认on
+
+是否以守护进程的方式运行nginx，守护进程是指脱离终端并且在后头运行的进程，关闭守护进程执行的方式可以让我们方便调试nginx。Docker 中使用 nginx -g "daemon off;"
+
+master_process on | of 默认on
+
+是否以master/worker方式进行工作，在实际的环境中 nginx是以一个master进程管理多个worker进程的方式运行的，关闭后 nginx就不会fork出worker子进程来处理请求，
+
+而是用master进程自身来处理请求
+```
+
 ### 二. 配置
 
 #### 1. 默认配置详解
@@ -284,6 +298,23 @@ upstream test {
   后续...
 
 #### 4. Rewrite
+
+### 三. 非Root启动
+
+1. apache的80端口为系统保留端口，如果通过其他非root用户启动，会报错。普通用户只能用1024以上的端口，1024以内的端口只能由root用户使用。
+2. Nignx 默认配置下，会去读写需要 ROOT 权限的文件和目录，需要提供自定义的配置文件。
+3. 注释配置文件的第一行，`# user nginx;`
+4. Dockerfile 中设置
+
+```ini
+RUN chown -R 1001:0 $HOME /usr/share/nginx /var /run && \
+    chown 1001:0 /usr/sbin/nginx && \
+    chmod 755 /usr/sbin/nginx && chmod u+s /usr/sbin/nginx && \
+    chmod -R 755 $STI_SCRIPTS_PATH && \
+    chmod -R g+rw /opt/s2i/destination
+
+USER 1001
+```
 
 
 

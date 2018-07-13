@@ -56,7 +56,51 @@ BuildConfig 是一个定义从 Input（参数、源码） 到 Output（可运行
   oc secrets link builder <mysecret>
   ```
 
-  
+- **Image Stream**
+
+  在 Openshift 中，可以通过 is + tag 去引用特定的 Docker Image，相当于 Docker repository。IS 的 Metadata 存储在 etcd 中。
+
+  ```yaml
+  spec:
+    tags:
+      from:
+        kind: ImageStreamTag
+        name: "20180621214733"
+  status:
+    dockerImageRepository: docker-registry.default.svc:5000/dante/wt-portal
+    tags:
+    - items:
+    	dockerImageReference: harbor.testos39.com/dante/wt-portal@sha256:4ba00276e67b2c233b6ec98bce04590e60e85e155b6bad8a73354fb2575ccb3b
+        generation: 3
+        ## Docker image ID
+        image: sha256:4ba00276e67b2c233b6ec98bce04590e60e85e155b6bad8a73354fb2575ccb3b
+      tag: "20180621214733"
+  ```
+
+  - Image Stream Image
+
+  ```powershell
+  <image-stream-name>@<image-id>
+  ```
+
+
+#### 3.3 CLI
+
+```shell
+## 创建 Java Image Stream
+## 确保 is 的 name、tag 和 image 的 name、tag 保持一致
+oc import-image java:8 --from=harbor.testos39.com/openshift/java:8 --insecure=true --confirm=true --scheduled=true
+
+oc import-image tomcat:8.0 --from=harbor.testos39.com/openshift/tomcat:8.0 --insecure=true --confirm=true --scheduled=true
+
+
+## CaaS 中，oc edit is java，加入 annotation（主要是 builder）
+- annotations:
+    iconClass: icon-java
+    tags: builder,java
+```
+
+
 
 ### 4. S2I
 
@@ -261,8 +305,7 @@ tar cf - ./.m2
 popd >/dev/null
 ```
 
-##### 4.2 Tomcat（8.0.x 和 8.5.x）
+### 5. Template
 
 
 
-##### 4.3 Node
