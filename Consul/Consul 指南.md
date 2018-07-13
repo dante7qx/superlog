@@ -10,7 +10,7 @@
 
 ​	可参考：
 
-		- http://bijian1013.iteye.com/blog/2355336
+- http://bijian1013.iteye.com/blog/2355336
 - https://hyperledgercn.github.io/hyperledgerDocs/gossip_zh/
 
 **Consensus 协议**
@@ -18,6 +18,8 @@
 ​	Consul 使用 **Raft** 协议来实现 **CAP**。一致性指的是多个服务器的状态达成一致**（共享的存储保持一致）**，但在分布式环境，难免出现各种意外，这个就无法和其他服务保持一致。为了在意外发生时，系统任然能够正常的对外提供服务，就需要一种容错性的协议，即最终一致性协议。Raft 协议中，每一个Node在三中角色切换Leader、Follower、Candidate。可参考 https://zhuanlan.zhihu.com/p/27207160。
 
 ### 二. 架构
+
+![架构图](./架构图.png)
 
 **术语**
 
