@@ -100,10 +100,10 @@ docker run -d --name dante-consul-1 -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_inte
 ## 获取 Leader ip
 JOIN_IP="$(docker inspect -f '{{.NetworkSettings.IPAddress}}' dante-consul-1)"
 
-## flower 1
+## Follower 1
 docker run -d --name dante-consul-2 -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true}' -v /Users/dante/Documents/Technique/Consul/data/docker/node2:/consul/data consul agent -server  -node=dante-consul-2 -client 0.0.0.0 -bootstrap-expect=3 -join $JOIN_IP
 
-## flower 2
+## Follower 2
 docker run -d --name dante-consul-3 -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_interrupt": true}' -v /Users/dante/Documents/Technique/Consul/data/docker/node3:/consul/data consul agent -server  -node=dante-consul-3 -client 0.0.0.0 -bootstrap-expect=3 -join $JOIN_IP
 
 ## 清理
