@@ -95,7 +95,7 @@ consul members
 
 ### 五. SpringCloud集成
 
-1. 添加依赖
+#### 1. 添加依赖
 
 ```xml
 <dependency>
@@ -109,7 +109,7 @@ consul members
 </dependency>
 ```
 
-2. 添加注解
+#### 2. 添加注解
 
 ```java
 @EnableDiscoveryClient
@@ -121,7 +121,7 @@ public class ConsulServiceApplication {
 }
 ```
 
-3. 配置
+#### 3. 配置
 
 ```yaml
 server:
@@ -131,7 +131,7 @@ spring:
     name: micro-consul-service
   cloud:
     consul:
-      host: localhost
+      host: localhost	## 集群环境，要配置 VIP
       port: 8500
       scheme: http
       discovery:
@@ -143,11 +143,60 @@ spring:
         tags: x-man, TaiTan
 ```
 
-4. Consul Web 管理
+#### 4. Consul Web 管理
 
-   访问： http://localhost:8500/ui
+访问： http://localhost:8500/ui
+
+#### 5. Spring Cloud Consul Config
+
+使用 Consul 集群的 KV Store 来实现应用配置的统一管理，比Spring Cloud Config速度快。
+
+- 添加依赖
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-consul-config</artifactId>
+</dependency>
+```
+
+- 配置 bootstrap.yml
+
+```yaml
+spring:
+  application:
+    name: micro-consul-config
+  profiles:
+    active: dev
+
+---    
+spring: 
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        prefer-ip-address: true
+        health-check-path: /health
+      config:
+        enabled: true
+        prefix: config	## 配置文件的目录名
+        format: YAML	## 配置文件的格式
+        data-key: data	## 配置的 Key，默认是 data
+        profile-separator: '/'	## spring profile 的分隔符，默认","。appname,profile
+        watch:
+          enabled: true		## 监视Consul KV，自动调用 /refresh
+```
+
+- 建议使用 @ConfigurationProperties 的方式。
+- Consul 配置如下图
+
+![consul config 1](./consul config 1.png)
+
+![consul config 1](./consul config 2.png)
 
 ### 六. 参考资料
 
 - https://www.consul.io/docs
 - http://chenjumin.iteye.com/blog/2293498
+- https://www.jianshu.com/p/f02df42f7c0c
