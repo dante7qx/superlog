@@ -277,7 +277,7 @@ boolean isThereAnyChild = persons.stream().
 System.out.println("Any child? " + isThereAnyChild);
 ```
 
-![Stream API](/Users/dante/Documents/Technique/且行且记/Java/Stream API.png)
+![Stream API](./Stream API.png)
 
 #### 原始类型流
 
@@ -378,9 +378,9 @@ Map<Boolean, Map<Dish.Type, List<Dish>>> vegetarianDishesByType = menu.stream().
 	partitioningBy(Dish::isVegetarian, groupingBy(Dish::getType)));
 ```
 
-![Collectors - 1](/Users/dante/Documents/Technique/且行且记/Java/Collectors - 1.png)
+![Collectors - 1](./Collectors - 1.png)
 
-![Collectors - 2](/Users/dante/Documents/Technique/且行且记/Java/Collectors - 2.png)
+![Collectors - 2](./Collectors - 2.png)
 
 #### 5. Optional
 
@@ -425,9 +425,9 @@ if(user != null) {
 }
 ```
 
-![Optional - 1](/Users/dante/Documents/Technique/且行且记/Java/Optional - 1.png)
+![Optional - 1](./Optional - 1.png)
 
-![Optional - 2](/Users/dante/Documents/Technique/且行且记/Java/Optional - 2.png)
+![Optional - 2](./Optional - 2.png)
 
 ### 8. 参考
 

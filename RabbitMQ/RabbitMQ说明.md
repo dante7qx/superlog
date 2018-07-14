@@ -249,7 +249,7 @@ rabbitmqctl set_policy ha-nodes "^nodes\." '{"ha-mode":"nodes","ha-params":["rab
 
 ### 三. 工作原理
 
-![rabbit架构](/Users/dante/Documents/Technique/且行且记/RabbitMQ/rabbit架构.png)
+![rabbit架构](./rabbit架构.png)
 
 1. 生产者和消费者和RabbitMq Server建立信道 Channel 连接。
 2. 消息生产者将消息发布(Public)到 Exchange 中。
@@ -306,9 +306,9 @@ connection.close();
 
 #### 交换器 Exchange
 
-​					![路由](/Users/dante/Documents/Technique/且行且记/RabbitMQ/路由.png)
+​	服务器发送消息不会直接发送到队列中（Queue），而是直接发送给交换机（Exchange），然后根据路由键（Routing key），队列通过路由键绑定到交换机上。**如果没有显示地绑定 Exchnge, 那么创建的每个 queue 都会自动绑定到这个默认的 exchagne 中, 并且此时这个 queue 的 route key 就是这个queue 的名字**。
 
-​	服务器发送消息不会直接发送到队列中（Queue），而是直接发送给交换机（Exchange），然后根据路由键（Routing key），队列通过路由键绑定到交换机上。**如果没有显示地绑定 Exchnge, 那么创建的每个 queue 都会自动绑定到这个默认的 exchagne 中, 并且此时这个 queue 的 route key 就是这个queue 的名字**.
+​	![路由](./路由.png)
 
 Exchange主要有四种
 
