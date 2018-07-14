@@ -14,7 +14,7 @@
 
 **高可用架构**
 
-![Eureka-HA](/Users/dante/Documents/Technique/且行且记/SpringCloud/Eureka-HA.png)
+![Eureka-HA](./Eureka-HA.png)
 
 ​	每个区域（Region，本例中只有一个Region）中都有一个 Eureka Cluster，它具有所有Service的注册信息，Eureka Server之间相互复制注册信息，确保总有一个Eureka Server可以处理区域故障。
 

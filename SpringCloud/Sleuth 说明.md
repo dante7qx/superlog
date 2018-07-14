@@ -20,11 +20,11 @@
 
 #### 2. ZipKin
 
-![zipkin](/Users/dante/Documents/Technique/且行且记/SpringCloud/zipkin.png)
+![zipkin](./zipkin.png)
 
 ​	ZipKin是基于Dapper论文理念的一套开源实现。主要流程如下：
 
-![zipkin-流程图](/Users/dante/Documents/Technique/且行且记/SpringCloud/zipkin-流程图.png)
+![zipkin-流程图](./zipkin-流程图.png)
 
 - collector：Zipkin Collector。
 - storage：默认存储在 Cassandra，支持 ElasticSearch 和 MySQL。
@@ -53,9 +53,9 @@
       - port
   - **BinaryAnnotations：**业务标注列表，如果某些跟踪埋点需要带上部分业务数据（比如url地址、返回码和异常信息等），可以将需要的数据以键值对的形式放入到这个字段中。
 
-![Zipkin flow](/Users/dante/Documents/Technique/且行且记/SpringCloud/Zipkin flow.png)
+![Zipkin flow](./Zipkin flow.png)
 
-![zipkin span flow](/Users/dante/Documents/Technique/且行且记/SpringCloud/zipkin span flow.png)
+![zipkin span flow](./zipkin span flow.png)
 
 - **Sampled:** 采样率，保证低消耗遇到大量请求时只记录其中的一小部分。自适应采样率。
 

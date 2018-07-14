@@ -1,6 +1,6 @@
 ## Circuit Breaker - Hystrix
 
-![hystrix-logo](/Users/dante/Documents/Technique/且行且记/SpringCloud/hystrix-logo.png)
+![hystrix-logo](./hystrix-logo.png)
 
 ### 一. 概念
 
@@ -12,13 +12,13 @@
 
 服务调用失败时,接下来的调用都会失败，每一次的失败都会造成很大的延迟，直到服务恢复正常。那么能否在失败时，不再调用失败的服务，而直接返回错误信息，然后服务内部自己去调用服务，如果发现成功了，再直接调用服务，返回结果，而不再返回错误信息。即容错机制。
 
-![断路器模式](/Users/dante/Documents/Technique/且行且记/SpringCloud/断路器模式.png)
+![断路器模式](./断路器模式.png)
 
 ### 二. 原理
 
 ​	断路器模式能阻止应用重复调用曾经调用失败的服务,断路器直接返回错误信息，与此同时，断路器内部能够侦测服务是否恢复可用，如果可用，应用将再次直接调用正常的服务。
 
-​	断路器：当Hystrix Command请求后端服务失败数量超过一定比例(默认50%)，断路器会切换到开路状态(Open). 这时所有请求会直接失败而不会发送到后端服务. 断路器保持在开路状态一段时间后(默认5秒), 自动切换到半开路状态(HALF-OPEN). 这时会判断下一次请求的返回情况, 如果请求成功, 断路器切回闭路状态(CLOSED), 否则重新切换到开路状态(OPEN)。![断路器原理](/Users/dante/Documents/Technique/且行且记/SpringCloud/断路器原理.png)
+​	断路器：当Hystrix Command请求后端服务失败数量超过一定比例(默认50%)，断路器会切换到开路状态(Open). 这时所有请求会直接失败而不会发送到后端服务. 断路器保持在开路状态一段时间后(默认5秒), 自动切换到半开路状态(HALF-OPEN). 这时会判断下一次请求的返回情况, 如果请求成功, 断路器切回闭路状态(CLOSED), 否则重新切换到开路状态(OPEN)。![断路器原理](./断路器原理.png)
 
 ### 三. Hystrix介绍
 
@@ -40,11 +40,11 @@
 
 #### **3. 线程模型**
 
-![Hystrix线程模型](/Users/dante/Documents/Technique/且行且记/SpringCloud/Hystrix线程模型.png)
+![Hystrix线程模型](./Hystrix线程模型.png)
 
 #### **4. 工作机理**
 
-![Hystrix工作机理](/Users/dante/Documents/Technique/且行且记/SpringCloud/Hystrix工作机理.png)
+![Hystrix工作机理](./Hystrix工作机理.png)
 
 #### 5. 线程池与信号量
 

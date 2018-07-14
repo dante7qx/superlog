@@ -299,7 +299,7 @@ encrypt:
 
   http://localhost:8888/trace
 
-  ![Spring Cloud Bus](/Users/dante/Documents/Technique/且行且记/SpringCloud/Spring Cloud Bus.png)
+  ![Spring Cloud Bus](./Spring Cloud Bus.png)
 
 ### 八. 参考资料
 

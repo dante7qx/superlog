@@ -11,7 +11,7 @@
 1. 对客户端不透明的：客户端需要知道服务器端的服务列表，需要自行决定请求要发送的目标地址
 2. 客户端维护负载均衡服务器，控制负载均衡策略和算法
 
-#### ![Ribbon Client Load Balance](/Users/dante/Documents/Technique/且行且记/SpringCloud/Ribbon Client Load Balance.png)**服务器端负载均衡**
+#### ![Ribbon Client Load Balance](./Ribbon Client Load Balance.png)**服务器端负载均衡**
 
 ​	在服务器端架设负载均衡服务器，用户请求到中间层的负载均衡服务器,由负载均衡服务器分发控制到真实提供服务的应用服务器。
 
@@ -19,7 +19,7 @@
 
 2. 服务器端维护负载均衡服务器，控制负载均衡策略和算法
 
-   ![Server Load Balance](/Users/dante/Documents/Technique/且行且记/SpringCloud/Server Load Balance.png)
+   ![Server Load Balance](./Server Load Balance.png)
 
 - 软件
   - Ngnix
@@ -68,7 +68,7 @@
 
 - Rule - 策略组件（轮询round bobin、随机 random、根据相应时间加权等）
 
-  ![Ribbon Rule](/Users/dante/Documents/Technique/且行且记/SpringCloud/Ribbon Rule.png)
+  ![Ribbon Rule](./Ribbon Rule.png)
 
 - Ping - 服务状态检测组件，后台运行
 
@@ -102,7 +102,7 @@
       MaxAutoRetriesNextServer: 1 # 切换Server实例的重试次数 (不包括第一次连接请求)
   ```
 
-  ​	==Hystrix timeout 时间要大于Ribbon timeout，例如：Ribbon connection timeout 是1秒，并且重试次数为3次，则Hystrix timeout需要设置大于3秒，设置如下==
+  ​	 **Hystrix timeout 时间要大于Ribbon timeout，例如：Ribbon connection timeout 是1秒，并且重试次数为3次，则Hystrix timeout需要设置大于3秒，设置如下**
 
   ​	**`hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 5`**
 

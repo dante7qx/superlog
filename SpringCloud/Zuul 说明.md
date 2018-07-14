@@ -12,13 +12,13 @@
 - 静态响应处理: 在边缘位置直接建立部分响应，从而避免其流入内部集群。
 - 多区域弹性: 跨越AWS区域进行请求路由，旨在实现ELB使用多样化并保证边缘位置与使用者尽可能接近。
 
-![zuul-场景](/Users/dante/Documents/Technique/且行且记/SpringCloud/zuul-场景.png)
+![zuul-场景](./zuul-场景.png)
 
 ### 二. 工作原理
 
 **架构图**
 
-![zuul-架构图](/Users/dante/Documents/Technique/且行且记/SpringCloud/zuul-架构图.png)
+![zuul-架构图](./zuul-架构图.png)
 
 ​	Zuul提供了一个框架，可以对过滤器进行动态的加载，编译，运行。过滤器之间没有直接的相互通信。他们是通过一个**RequestContext**的静态类来进行数据传递的。RequestContext类中有ThreadLocal变量来记录每个Request所需要传递的数据。
 
@@ -34,7 +34,7 @@
 
 **Zuul Filter 生命周期**
 
-![zuul-filter生命周期](/Users/dante/Documents/Technique/且行且记/SpringCloud/zuul-filter生命周期.png)
+![zuul-filter生命周期](./zuul-filter生命周期.png)
 
 ### 三. 如何使用
 
