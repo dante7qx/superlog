@@ -110,6 +110,11 @@ docker run -d --name dante-consul-3 -e 'CONSUL_LOCAL_CONFIG={"skip_leave_on_inte
 docker rm $(docker stop dante-consul-1)
 docker rm $(docker stop dante-consul-2)
 docker rm $(docker stop dante-consul-3)
+
+## 重启
+docker start dante-consul-1
+docker start dante-consul-2
+docker start dante-consul-3
 ```
 
 ### 五. 配置详解
