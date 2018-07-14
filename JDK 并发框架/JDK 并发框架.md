@@ -2,9 +2,9 @@
 
 ### Executor 相关类
 
-![Executor相关](/Users/dante/Documents/Technique/且行且记/JDK 并发框架/Executor相关.png)
+![Executor相关](./Executor相关.png)
 
-![Future相关](/Users/dante/Documents/Technique/且行且记/JDK 并发框架/Future相关.png)
+![Future相关](./Future相关.png)
 
 #### Executor
 
@@ -239,7 +239,7 @@ public ThreadPoolExecutor(int corePoolSize,
 
 **ForkJoinTask 任务**
 
-![ForkJoinTask](/Users/dante/Documents/Technique/且行且记/JDK 并发框架/ForkJoinTask.png)
+![ForkJoinTask](./ForkJoinTask.png)
 
 - `ForkJoinTask<V>` 用来专门定义 Fork/Join 型任务 —— 完成将大任务分割为小任务以及合并结果的工作。
 
@@ -329,6 +329,6 @@ ForkJoinPool-1-worker-2 -> 93
 
 ### Queue相关
 
-![Queue相关](/Users/dante/Documents/Technique/且行且记/JDK 并发框架/Queue相关.png)
+![Queue相关](./Queue相关.png)
 
 --
