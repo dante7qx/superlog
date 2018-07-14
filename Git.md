@@ -24,7 +24,7 @@ git commit -m "添加readme.md"
 
 ####生命周期
 
-![Git 生命周期](/Users/dante/Documents/Technique/且行且记/Git 生命周期.png)
+![Git 生命周期](./Git 生命周期.png)
 
 #### ***`git status`***  查看状态
 
@@ -237,7 +237,7 @@ $ git commit --amend
 
 `master`分支是一条线，Git用`master`指向最新的提交，再用`HEAD`指向`master`，就能确定当前分支，以及当前分支的提交点
 
-![指针](/Users/dante/Documents/Technique/且行且记/指针.png)
+![指针](./指针.png)
 
 ```shell
 查看分支：git branch
