@@ -4,7 +4,7 @@
 
 ​	Maven本身自带一个本地仓库；然后它又为全世界的Java开发者提供了一个免费的“中央仓库”，在其中几乎可以找到任何流行的开源类库；由于中央仓库是在外网中的，如果没有私服（Nexus），本地仓库就会频繁地与中央仓库即互联网打交道，这样效率很低，所以在两者之间衍生出了一个“私服——Nexus”，私服存在于局域网中，这样本地仓库就不用频繁地与外网中的中央仓库交互，所以效率就会大大提高。
 
-![Nexus](/Users/dante/Documents/Technique/且行且记/Devops/Nexus.png)
+![Nexus](./Nexus.png)
 
 ### 二. 安装
 
@@ -102,7 +102,7 @@
 
    ​	**所以自定义构建的仓库组代理仓库的顺序为：Releases，Snapshots，3rd party，Central。也可以使用oschina放到Central前面，下载包会更快。**
 
-   ![Nexus Repo](/Users/dante/Documents/Technique/且行且记/Devops/Nexus Repo.png)
+   ![Nexus Repo](./Nexus Repo.png)
 
    ​
 

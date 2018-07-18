@@ -137,7 +137,7 @@
 
 - 配置Sonar
 
-  ![Sonar-Jenkins](/Users/dante/Documents/Technique/且行且记/Devops/Sonar-Jenkins.png)
+  ![Sonar-Jenkins](./Sonar-Jenkins.png)
 
 - 在pipeline中使用（项目中有sonar-project.properties）
 
