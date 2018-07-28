@@ -272,6 +272,22 @@ Publisher->Subscriber: 数据发送完毕，调用onComplete通知Subscriber
 
 ###### 4） 数据流
 
+![Sink 机制](./Sink 机制.png)
+
+​	Reactor 通过 Sink 来自定义数据流，Sink 中定义事件 next()、error()、complete()。Reactor 提供的创建方法有 generate、create、push 和 handle 等。
+
+- **generate**
+
+  同步的，逐个地发出数据的方法。sink是一个`SynchronousSink`， 而且其`next()`方法在每次回调的时候最多只能被调用一次。
+
+```java
+public static <T> Flux<T> generate(Consumer<SynchronousSink<T>> generator)
+
+public static <T, S> Flux<T> generate(Callable<S> stateSupplier, BiFunction<S, SynchronousSink<T>, S> generator) 
+
+public static <T, S> Flux<T> generate(Callable<S> stateSupplier, BiFunction<S, SynchronousSink<T>, S> generator, Consumer<? super S> stateConsumer)
+```
+
 
 
 ##### 3.6 实际案例
