@@ -39,7 +39,7 @@
 
 #### 1. 工作原理
 
-![Reactor 原理](./Reactor 原理.png)
+![Reactor 原理](./Reactor/Reactor 原理.png)
 
 #### 2. 术语
 
@@ -51,13 +51,13 @@
 
 - **正常流**
 
-![flow-common](./flow-common.png)
+![flow-common](./Reactor/flow-common.png)
 
 ​	当**Publisher**发出数据的速度超过**Subscriber**的消费速度时，数据就会积压在==管道==或==消费者==中。这样数据可能会被丢弃掉了或者OOM。
 
 - **控制流**
 
-![flow-presure](./flow-presure.png)
+![flow-presure](./Reactor/flow-presure.png)
 
 ​	数据流并不一生产出来就直接 push 到 Subscriber。而是由 Subscriber 向上游反馈流量请求，需要多少Publisher 就推送多少。通过 request 来制定具体的数量。
 
@@ -79,11 +79,11 @@
 
 - Flux：黑色箭头是时间轴。它连续发出“1” - “6”共6个元素值，以及一个完成信号。
 
-![Flux](./Flux.png)
+![Flux](./Reactor/Flux.png)
 
 - Mono：发出一个元素值后，又发出一个完成信号。
 
-![Mono](./Mono.png)
+![Mono](./Reactor/Mono.png)
 
 ##### 3.2 常用操作
 
@@ -178,7 +178,7 @@ subscribe(Consumer<? super T> consumer,
 | **newFixedThreadPool**      | 固定大小线程池， 所创建线程池的大小与CPU个数等同 <br>**Schedulers.parallel() 和 Schedulers.newParallel()** |
 | **newScheduledThreadPool**  |              以上三种都支持定时任务和周期性执行              |
 
-   ![Reactor调度器](./Reactor调度器.png)
+   ![Reactor调度器](./Reactor/Reactor调度器.png)
 
 ```java
 Flux.range(1, 1000)
@@ -220,6 +220,26 @@ Flux.range(1, 6)
         }
     });
 ```
+
+- 回压策略：发布者和订阅者不用同一个线程，订阅者消费消息的速率赶不上发布者发布消息的速率。
+
+  - BUFFER：缓存下游来不及处理的数据（默认策略，有 OOM 的危险）。
+
+  ![onBackpressureBuffer](./Reactor/onBackpressureBuffer.png)
+
+  - DROP：下游来不及处理的数据，该数据被丢弃。
+
+  ![onBackpressureDrop](./Reactor/onBackpressureDrop.png)
+
+  - LATEST：下游只获取上游的最新数据。
+
+  ![onBackpressureLatest](./Reactor/onBackpressureLatest.png)
+
+  - ERROR：下游来不及处理时，发出一个 Error Signal。
+
+  ![onBackpressureError](./Reactor/onBackpressureError.png)
+
+  - IGNORE：完全忽略下游背压请求，这可能会在下游队列积满的时候导致 IllegalStateException。
 
 ##### 3.5 响应式流规范
 
@@ -278,7 +298,7 @@ Publisher->Subscriber: 数据发送完毕，调用onComplete通知Subscriber
 
 - **generate**
 
-  同步的，逐个地发出数据的方法。sink是一个`SynchronousSink`， 而且其`next()`方法在每次回调的时候最多只能被调用一次。
+  **同步的，逐个地发出数据的方法**。sink是一个`SynchronousSink`， 而且其`next()`方法在每次回调的时候最多只能被调用一次。
 
 ```java
 public static <T> Flux<T> generate(Consumer<SynchronousSink<T>> generator)
@@ -288,7 +308,14 @@ public static <T, S> Flux<T> generate(Callable<S> stateSupplier, BiFunction<S, S
 public static <T, S> Flux<T> generate(Callable<S> stateSupplier, BiFunction<S, SynchronousSink<T>, S> generator, Consumer<? super S> stateConsumer)
 ```
 
+- **create**
 
+  同步的或异步的，并且还可以每次发出多个元素。Sink 是一个 `FluxSink`，可以在回调中触发多个事件。create 常用的场景就是将现有的 API 转为响应式，比如监听器的异步方法。
+
+```java
+public static <T> Flux<T> create(Consumer<? super FluxSink<T>> emitter)
+public static <T> Flux<T> create(Consumer<? super FluxSink<T>> emitter, OverflowStrategy backpressure)
+```
 
 ##### 3.6 实际案例
 
@@ -296,12 +323,148 @@ public static <T, S> Flux<T> generate(Callable<S> stateSupplier, BiFunction<S, S
 
 ### 三. Spring WebFlux
 
+Spring 5 中添加了基于 Reactor 的响应式的 Web 框架。有两种实现方式注解式、声明式。
 
+**添加依赖**
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux</artifactId>
+</dependency>
+```
+
+#### 1. 注解式
+
+基于 Spring MVC，注解的方式一样。
+
+```java
+@GetMapping("/flux")
+public Flux<String> flux() {
+    return Flux.just("你好", "Spring WebFlux", "Reactor", "Netty")
+        .map(x -> x.concat(" <br>"));
+}
+
+@GetMapping("/usr")
+public Mono<UserVO> getUser() {
+    return Mono.just(new UserVO("但丁", 33, "ch.sun@haihangyun.com"));
+}
+
+@PostMapping("/update")
+public Mono<AddressPO> updateAddress(@RequestBody AddressPO address) {
+    return addressService.persistAddress(address);
+}
+```
+
+#### 2. 声明式
+
+基于 Lambda 表达式，分为 Handler 和 Router。
+
+- **Handler**
+
+```java
+@Slf4j
+@Component
+public class UserHandler {
+    
+    @Autowired
+	private GithubClient githubClient;
+    
+    /**
+	 * 根据 name 获取用户
+	 * 
+	 * @param request
+	 * @return
+	 */
+    public Mono<ServerResponse> getUser(ServerRequest request) {
+		String name = request.pathVariable("name");
+		log.info("PathVariable name = {}", name);
+		return ok().contentType(MediaType.APPLICATION_JSON)
+				.body(Mono.just(new UserVO("但丁", 33, "ch.sun@haihangyun.com")), UserVO.class);
+	}
+    
+    /**
+	 * 获取 User 列表
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public Mono<ServerResponse> getUsers(ServerRequest request) {
+		String methodName = request.methodName();
+		Flux<UserVO> userParameter = request.bodyToFlux(UserVO.class);
+		log.info("Request method {}", methodName);
+		userParameter.subscribe(u -> log.info("UserParameter {}", u));
+		return ok().contentType(MediaType.APPLICATION_JSON).body(
+				Flux.just(new UserVO("但丁", 33, "ch.sun@haihangyun.com"), new UserVO("Snake", 45, "snake@163.com")),
+				UserVO.class);
+	}
+    
+    /**
+	 * 获取 Github 用户详情
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public Mono<ServerResponse> getGithubUser(ServerRequest request) {
+		String uid = request.pathVariable("uid");
+		Mono<GithubUserVO> user = githubClient.getUser(uid);
+		return ok().contentType(MediaType.APPLICATION_JSON).body(user, GithubUserVO.class);
+	}
+}
+```
+
+- **Router**
+
+```java
+@Configuration
+public class RouterConfig {
+    @Autowired
+	private UserHandler userHandler;
+    
+    @Bean
+	public RouterFunction<ServerResponse> userRouter() {
+		 return route(GET("/user/{name}").and(accept(MediaType.APPLICATION_JSON)), userHandler::getUser)
+				.andRoute(GET("/users"), userHandler::getUsers)
+				.andRoute(POST("/users"), userHandler::getUsers)
+				.andRoute(GET("/github/{uid}"), userHandler::getGithubUser);
+	}
+}
+```
+
+#### 3. WebClient
+
+响应式、非阻塞的HTTP client library，作用同 RestTemplate。
+
+```java
+@Service
+public class GithubClient {
+	
+	WebClient client = WebClient.create("https://api.github.com");
+	
+	/**
+	 * 获取 Github 用户详情
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	public Mono<GithubUserVO> getUser(String userId) {
+		Mono<GithubUserVO> githubUserVO = client.get()
+			.uri("/users/{uid}", userId)
+			.accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.bodyToMono(GithubUserVO.class).log();
+		return githubUserVO;
+	}
+
+}
+```
 
 ### 四. 参考资料
 
 - https://htmlpreview.github.io/?https://github.com/get-set/reactor-core/blob/master-zh/src/docs/index.html#intro-reactive
 - http://chillyc.info/2017/jdk9/Java9-Flow-feature/
 - http://blog.51cto.com/liukang/2090163
-- https://blog.csdn.net/column/details/20300.html
 - https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html
+- https://github.com/reactor/lite-rx-api-hands-on
+- https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html
+
