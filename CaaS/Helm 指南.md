@@ -30,6 +30,14 @@
   Chart->Release: Helm 安装 Chart，每个 Chart 运行一个 Release \nhelm install stable/redis
   ```
 
+- **使用目的**
+
+在原来项目中都是基于yaml文件来进行部署发布的，而目前项目大部分微服务化或者模块化，会分成很多个组件来部署，每个组件可能对应一个deployment.yaml、一个service.yaml、一个Ingress.yaml还可能存在各种依赖关系，这样一个项目如果有5个组件，很可能就有15个不同的yaml文件，这些yaml分散存放，如果某天进行项目恢复的话，很难知道部署顺序，依赖关系等，而所有这些包括都可以通过helm来进行解决。
+
+- 基于yaml配置的集中存放
+- 基于项目的打包
+- 组件间的依赖
+
 ### 二. 安装
 
 下载 https://github.com/helm/helm/releases
@@ -87,6 +95,14 @@ spec:
     - name: TILLER_HISTORY_MAX
       value: "0"
 ...
+```
+
+#### 4. 卸载
+
+```shell
+kubectl delete deployment tiller-deploy --namespace kube-system
+## 或者
+helm reset
 ```
 
 ### 三. 架构及原理
