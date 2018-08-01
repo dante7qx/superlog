@@ -114,9 +114,21 @@ https://stackoverflow.com/questions/38276341/jenkins-ci-pipeline-scripts-not-per
 <arguments>-Dpermissive-script-security.enabled=true -Xrs -Xmx4096m -Dhudson.lifecycle=hudson.lifecycle.WindowsServiceLifecycle -jar "%BASE%\jenkins.war" --httpPort=80 --webroot="%BASE%\war"</arguments>
 ```
 
-### 四. Pipeline 案例 
+### 四. Pipeline 
 
+#### 1. Credentials 使用
 
+- 创建 Credentials
+
+![AddCredentials](./AddCredentials.png)
+
+- Pipeline 中使用Username 和 Password
+
+```groovy
+withCredentials([usernamePassword(credentialsId: 'jenkins_pipeline_credentials', passwordVariable: 'usrname', usernameVariable: 'usrpwd')]) {
+    sh "docker login xx.harbor.com -u ${usrname} -p ${usrpwd}"
+}
+```
 
 ### 五. 坑
 
