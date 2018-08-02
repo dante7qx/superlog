@@ -315,31 +315,9 @@ helm reset
 
   ```shell
   helm install --name dante-springboot dante-springboot/
-  
-  ## 终端输出
-  NAME:   dante-springboot
-  LAST DEPLOYED: Thu Aug  2 13:23:30 2018
-  NAMESPACE: default
-  STATUS: DEPLOYED
-  
-  RESOURCES:
-  ==> v1/Service
-  NAME              TYPE      CLUSTER-IP      EXTERNAL-IP  PORT(S)         AGE
-  dante-springboot  NodePort  10.107.177.120  <none>       8080:32000/TCP  1s
-  
-  ==> v1/Deployment
-  NAME              DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
-  dante-springboot  2        0        0           0          1s
-  
-  
-  NOTES:
-  1. Get the application URL by running these commands:
-    export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services dante-springboot)
-    export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
-    echo http://$NODE_IP:$NODE_PORT
-  
-  2. 这是我的第一个 helm 部署的应用
   ```
+
+  ![helm-install](./helm-install.png)
 
   - **方式二**
 
