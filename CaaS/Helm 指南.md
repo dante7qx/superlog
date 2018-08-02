@@ -311,9 +311,12 @@ helm reset
 
 - **运行实例 Release**
 
-  - **方式一**： helm install --name dante-springboot dante-springboot/
+  - **方式一**
 
   ```shell
+  helm install --name dante-springboot dante-springboot/
+  
+  ## 终端输出
   NAME:   dante-springboot
   LAST DEPLOYED: Thu Aug  2 13:23:30 2018
   NAMESPACE: default
