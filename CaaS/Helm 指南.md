@@ -445,6 +445,24 @@ helm install --name dante-springboot miniorepo/dante-springboot
 
 4. 测试 `helm install --dry-run --debug dante-springboot/`
 
+- **CRD** （**CustomResourceDefinition**）
+
+  k8s 的扩展资源。即特定的一些需求，CRD 提供了轻量级的机制，保证新的资源的快速注册和使用。
+
+  ```yaml
+  apiVersion: apiextensions.k8s.io/v1beta1
+  kind: CustomResourceDefinition
+  metadata:
+    name: foos.samplecontroller.k8s.io
+  spec:
+    group: samplecontroller.k8s.io
+    version: v1alpha1
+    names:
+      kind: Foo
+      plural: foos
+    scope: Namespaced
+  ```
+
 ### 五. 参考资料
 
 - https://docs.helm.sh/
@@ -453,3 +471,4 @@ helm install --name dante-springboot miniorepo/dante-springboot
 - https://blog.csdn.net/chenleiking/article/details/79539012
 - https://daemonza.github.io/2017/02/20/using-helm-to-deploy-to-kubernetes/
 - https://www.minio.io/
+- https://medium.com/@gajus/the-missing-ci-cd-kubernetes-component-helm-package-manager-1fe002aac680
