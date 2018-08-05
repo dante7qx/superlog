@@ -112,41 +112,103 @@
   2. **Service 的端口必须命名，命名规则 <protocol>[-<suffix>]，例如：http-shop、mongo-db。目的是使用Istio的路由功能，否则流量均作为 TCP 流量来处理。**
   3. **Deployment 必须为 Pod 设置一个明确的Label （app），即 app = login，并且每个 Deployment 中的 app label 要唯一。目的是 app label 用于在 Zipkin 中添加上下文。**
   4. **每个 pod 里都有一个 Sidecar。分手动注入、自动注入。**
-
+  5. **应用只支持 HTTP/1.1 或 HTTP/2.0 协议，HTTP/1.0 不支持。**
 - 安装步骤
 
   1. 下载 Istio。 https://github.com/istio/istio/releases
-
   2. 设置 Istio 的环境变量 
 
-  3. 安装 istio （Master 节点）
+##### 3.1 k8s
 
-     - 默认自动注入 Sidecar（k8s 版本必须是 1.9 以上），可在 istio-demo.yaml 中设置为手工注入。
+1. 安装 Istio 的 Custom Resource Definitions
 
-       1）Sidecar 之间通信不进行 TLS 验证，可以和非 Istio 的k8s Service 进行通信。
+   ```shell
+   kubectl apply -f install/kubernates/helm/istio/templates/crds.yaml
+   ```
 
-       `kubectl apply -f install/kubernetes/istio-demo.yaml`
+2. 安装 istio （Master 节点）
 
-       2) Sidecar 之间通信部进行 TLS 验证，在新的 k8s 集群中使用此安装。
+   - 默认自动注入 Sidecar（k8s 版本必须是 1.9 以上），可在 istio-demo.yaml 中设置为手工注入。
 
-       `kubectl apply -f install/kubernetes/istio-demo-auth.yaml`
+     - Sidecar 之间通信不进行 TLS 验证，可以和非 Istio 的k8s Service 进行通信。
 
-     - 部署应用
+     ```shell
+     kubectl apply -f install/kubernetes/istio-demo.yaml
+     ```
 
-       1）自动注入
+     - Sidecar 之间通信部进行 TLS 验证，在新的 k8s 集群中使用此安装。
 
-       ```shell
-       kubectl label namespace <namespace> istio-injection=enabled
-       kubectl create -n <namespace> -f <your-app-spec>.yaml
-       ```
+     ```shell
+     kubectl apply -f install/kubernetes/istio-demo-auth.yaml
+     ```
 
-       2）手动注入
+   - 部署应用
 
-       `kubectl create -f <(istioctl kube-inject -f <your-app-spec>.yaml)`
+     - 自动注入
 
-  4. 卸载
+     ```shell
+     kubectl label namespace <namespace> istio-injection=enabled
+     kubectl create -n <namespace> -f <your-app-spec>.yaml
+     
+     ## 清除
+     kubectl label namespace <namespace> istio-injection-
+     ```
 
-     `kubectl delete -f install/kubernetes/istio-demo.yaml`
+     - 手动注入
+
+     ```shell
+     kubectl create -f <(istioctl kube-inject -f <your-app-spec>.yaml)
+     ```
+
+3. 卸载
+
+   ```shell
+   kubectl delete -f install/kubernetes/istio-demo.yaml
+   ## 可选
+   kubectlkubectl delete -f install/kubernetes/helm/istio/templates/crds.yaml -n istio-system delete -f install/kubernete
+   ```
+
+##### 3.2 Helm（趋势）
+
+- 前提：Helm 的版本小于 2.10
+
+1. 安装 Istio 的 Custom Resource Definitions
+
+   ```shell
+   kubectl apply -f install/kubernates/helm/istio/templates/crds.yaml
+   ```
+
+2. helm install
+
+   - 创建 service account
+
+   ```shell
+   kubectl create -f install/kubernetes/helm/helm-service-account.yaml
+   ```
+
+   - 安装（或更新） Tiller
+
+   ```shell
+   helm init --service-account=tiller
+   # 或
+   helm init --service-account=tiller --upgrade
+   ```
+
+   - 安装 istio release
+
+   ```shell
+   helm install install/kubernetes/helm/istio --name istio --namespace istio-system --set gateways.istio-ingressgateway.type=NodePort
+   ```
+
+   - 卸载
+
+   ```shell
+   helm delete --purge istio
+   ## 可选
+   kubectlkubectl delete -f install/kubernetes/helm/istio/templates/crds.yaml -n istio-system delete -f install/kubernete
+   ```
+
+   
 
 #### 4. 功能详解
 
