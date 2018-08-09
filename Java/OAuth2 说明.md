@@ -6,11 +6,9 @@
 
 ​	例如 Dockerhub 要使用你 Github中的资源进行镜像构建，那么Dockerhub 如何才能获取你 Github 中的资源？
 
- 1. 将你 Github 的帐号、密码告知 DockerHub，DockerHub用来登录 Github 获取授权，然后访问Github 中的资源。
+1. 将你 Github 的帐号、密码告知 DockerHub，DockerHub用来登录 Github 获取授权，然后访问Github 中的资源。此种方式非常不安全，一旦 DockerHub 泄密，你的Github 的信息也将泄漏。
 
-    此种方式非常不安全，一旦 DockerHub 泄密，你的Github 的信息也将泄漏。
-
-	2. DockerHub 不需要知道用户密码就可以获取用户 Github 上的信息，即 OAuth2 的授权方式。 
+2. DockerHub 不需要知道用户密码就可以获取用户 Github 上的信息，即 OAuth2 的授权方式。 
 
 ### 二. 原理
 
