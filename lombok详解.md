@@ -135,5 +135,7 @@ private static final org.slf4j.ext.XLogger log = org.slf4j.ext.XLoggerFactory.ge
 
 ### 4. 参考资料
 
+- https://projectlombok.org/features/all
+
 - http://blog.csdn.net/sunsfan/article/details/53542374
 - http://www.jianshu.com/p/365ea41b3573
