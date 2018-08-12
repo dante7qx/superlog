@@ -56,18 +56,18 @@
   POST /oauth/auth/token
   ```
 
-  | 参数          | 说明                                         |
-  | ------------- | -------------------------------------------- |
-  | client_id     | * 客户端 AppId（在 **==竹尘==** 注册提供）   |
-  | client_secret | * 客户端 App密钥（在 **==竹尘==** 注册提供） |
-  | code          | * 授权码接口生成的授权码 code                |
-  | redirect_uri  | 和授权码接口中的 redirect_uri 保持一致       |
-  | state         | 和授权码接口中的 state 保持一致              |
-  | **返回**      | **说明**                                     |
-  | access_token  | * 访问令牌                                   |
-  | token_type    | * 令牌类型                                   |
-  | expire_in     | 过期时间，单位：秒                           |
-  | refresh_token | 刷新令牌，可获取新的访问令牌                 |
+  | 参数          | 说明                                                         |
+  | ------------- | ------------------------------------------------------------ |
+  | client_id     | * 客户端 AppId（在 **==竹尘==** 注册提供）                   |
+  | client_secret | * 客户端 App密钥（在 **==竹尘==** 注册提供）<br>**传递时使用竹尘提供的公钥进行加密，再进行Base64编码** |
+  | code          | * 授权码接口生成的授权码 code                                |
+  | redirect_uri  | 和授权码接口中的 redirect_uri 保持一致                       |
+  | state         | 和授权码接口中的 state 保持一致                              |
+  | **返回**      | **说明**                                                     |
+  | access_token  | * 访问令牌                                                   |
+  | token_type    | * 令牌类型                                                   |
+  | expire_in     | 过期时间，单位：秒                                           |
+  | refresh_token | 刷新令牌，可获取新的访问令牌                                 |
 
   - **API 接口**
 
@@ -114,6 +114,12 @@
 ### 四. SpringSecurity OAuth2
 
 
+
+### 五. OpenID
+
+OAuth关注的是Authorization，即授权，用户能干什么？
+
+OpenID侧重的是 Authentication，即认证，用户是谁？
 
 ### 八. 参考资料
 
