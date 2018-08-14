@@ -12,6 +12,9 @@
   - [RabbitMQ](RabbitMQ/RabbitMQ说明.md)
 * 分布式存储
   - [Consul](分布式存储/Consul/Consul 指南.md)
+* 软件负载器
+  - [Nginx.md](软件负载器/Nginx.md)
+  - [Haproxy.md](软件负载器/Haproxy.md)
 * 网络
 
   - [1.网络基础](网络/网络基础.md)
