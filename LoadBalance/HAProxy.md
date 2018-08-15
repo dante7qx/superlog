@@ -8,7 +8,7 @@
 
   根据静态分配的cookie路由HTTP请求。
 
- - **LoadBalance**
+ - **负载均衡**
 
    L4和L7两种模式，支持**RR / 静态RR / LC / IP Hash / URI Hash / URL_PARAM Hash / HTTP_HEADER Hash**等丰富的负载均衡算法。
 
