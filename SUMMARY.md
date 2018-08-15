@@ -14,7 +14,7 @@
   - [Consul](分布式存储/Consul/Consul 指南.md)
 * 软件负载器
   - [Nginx](软件负载器/Nginx.md)
-  - [HAProxy](软件负载器/HAProxy.md)
+  - [HAproxy](软件负载器/HAProxy.md)
 * 网络
 
   - [1.网络基础](网络/网络基础.md)
