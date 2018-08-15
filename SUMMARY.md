@@ -10,11 +10,11 @@
 
   - [Kafka](Kafka/Kafka 指南.md)
   - [RabbitMQ](RabbitMQ/RabbitMQ说明.md)
-* 分布式存储
-  - [Consul](分布式存储/Consul/Consul 指南.md)
+* 服务注册中心
+  - [Consul](服务注册中心/Consul/Consul 指南.md)
 * 软件负载器
-  - [Nginx](软件负载器/Nginx.md)
-  - [HAproxy](软件负载器/HAProxy.md)
+  - [Nginx](LoadBalance/Nginx.md)
+  - [HAProxy](LoadBalance/HAProxy.md)
 * 网络
 
   - [1.网络基础](网络/网络基础.md)
