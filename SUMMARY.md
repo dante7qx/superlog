@@ -63,6 +63,7 @@
   - [Jenkins](Devops/Jenkins说明.md)
   - [Sonarqube](Devops/Sonarqube 说明.md)
   - [Gerrit](Devops/Gerrit 说明.md)
+  - [Git](Devops/Git.md)
 * CaaS
 
   - [OpenShift](CaaS/OpenShift.md)
