@@ -47,7 +47,7 @@
   - [Feign](SpringCloud/Feign 说明.md)
   - [Circuit Breaker - Hystrix](SpringCloud/Circuit Breaker - Hystrix.md)
   - [Zuul](SpringCloud/Zuul 说明.md)
-  - [Gateway 说明](SpringCloud/Gateway 说明.md)
+  - [Gateway](SpringCloud/Gateway 说明.md)
   - [Sleuth](SpringCloud/Sleuth 说明.md)
   - [SideCar](SpringCloud/SideCar - 多语言支持.md)
   - [Spring Boot Admin](SpringCloud/Spring Boot Admin.md)
