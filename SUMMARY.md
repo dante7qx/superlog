@@ -42,22 +42,16 @@
 * SpringCloud
 
   - [Eureka](SpringCloud/Eureka.md)
-
   - [Config Server](SpringCloud/Config Server 说明.md)
-
   - [Ribbon](SpringCloud/Ribbon 说明.md)
-
   - [Feign](SpringCloud/Feign 说明.md)
-
   - [Circuit Breaker - Hystrix](SpringCloud/Circuit Breaker - Hystrix.md)
-
   - [Zuul](SpringCloud/Zuul 说明.md)
-
   - [Sleuth](SpringCloud/Sleuth 说明.md)
-
   - [SideCar](SpringCloud/SideCar - 多语言支持.md)
-
   - [Spring Boot Admin](SpringCloud/Spring Boot Admin.md)
+  - [Edgware 版本.md](SpringCloud/版本特性/Edgware 版本.md)
+  - [Finchley 版本.md](SpringCloud/版本特性/Finchley 版本.md)
 * Devops
   - [Nexus](Devops/Nexus 说明.md)
   - [Jenkins](Devops/Jenkins说明.md)
