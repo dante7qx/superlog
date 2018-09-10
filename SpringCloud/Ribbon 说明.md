@@ -2,18 +2,20 @@
 
 ### 一. 概念
 
-​	Ribbon是一个客户端负载均衡控制组件，由Netflix公司开发。
+	Ribbon是一个客户端负载均衡控制组件，由Netflix公司开发。
 
 #### **客户端负载均衡**
 
-​	负载均衡器作为客户端软件的一部分,客户端得到可用的服务器列表然后按照特定的负载均衡策略,分发请求到不同的服务器端。
+	负载均衡器作为客户端软件的一部分,客户端得到可用的服务器列表然后按照特定的负载均衡策略,分发请求到不同的服务器端。
 
 1. 对客户端不透明的：客户端需要知道服务器端的服务列表，需要自行决定请求要发送的目标地址
 2. 客户端维护负载均衡服务器，控制负载均衡策略和算法
 
-#### ![Ribbon Client Load Balance](./Ribbon Client Load Balance.png)**服务器端负载均衡**
+![Ribbon Client Load Balance](./Ribbon Client Load Balance.png)
 
-​	在服务器端架设负载均衡服务器，用户请求到中间层的负载均衡服务器,由负载均衡服务器分发控制到真实提供服务的应用服务器。
+#### **服务器端负载均衡**
+
+	在服务器端架设负载均衡服务器，用户请求到中间层的负载均衡服务器,由负载均衡服务器分发控制到真实提供服务的应用服务器。
 
 1. 对客户端透明的：客户端不知道服务器端的服务列表，甚至不知道自己发送请求的目标地址存在负载均衡器
 
@@ -42,14 +44,28 @@
    </dependency>
    ```
 
-2. 启动类添加 *RestTemplate*
+2. 配置Bean -  *RestTemplate*
 
    ```java
+   @Primary
+   @Bean
+   RestTemplate restTemplate() {
+       return new RestTemplate();
+   }
+   
    @Bean
    @LoadBalanced
-   public RestTemplate restTemplate() {
+   public RestTemplate loadBalanced() {
      return new RestTemplate();
    }
+   
+   // 使用
+   @Autowired
+   private RestTemplate restTemplate;
+   
+   @Autowired
+   @LoadBalanced
+   private RestTemplate loadBalanced;
    ```
 
 ### 三.  工作原理
@@ -78,7 +94,7 @@
 
   语法：`<clientName>.<nameSpace>.*` （Ribbon原生配置）
 
-  ​	   `<client>.ribbon.*` （SpringCloud中配置）
+  	   `<client>.ribbon.*` （SpringCloud中配置）
 
   说明：
 
@@ -86,7 +102,7 @@
   - SpringCloud中，配置文件的优先级高于代码自定义@RibbonClient
 
   ```yaml
-  micro-provider-user:
+  MICRO-PROVIDER-:
     ribbon:
     	NFLoadBalancerClassName: # should implement ILoadBalancer
       NFLoadBalancerRuleClassName: com.netflix.loadbalancer.ZoneAvoidanceRule # should implement IRule
@@ -102,9 +118,9 @@
       MaxAutoRetriesNextServer: 1 # 切换Server实例的重试次数 (不包括第一次连接请求)
   ```
 
-  ​	 **Hystrix timeout 时间要大于Ribbon timeout，例如：Ribbon connection timeout 是1秒，并且重试次数为3次，则Hystrix timeout需要设置大于3秒，设置如下**
+  	 **Hystrix timeout 时间要大于Ribbon timeout，例如：Ribbon connection timeout 是1秒，并且重试次数为3次，则Hystrix timeout需要设置大于3秒，设置如下**
 
-  ​	**`hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 5`**
+  	**`hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 5`**
 
   - 自定义@RibbonClient，不应该被启动类@ComponentScan，否则所有Ribbon都会被应用。需要被@ComponentScan排除
 
@@ -119,8 +135,6 @@
     @ComponentScan(excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = BootStartExclude.class)})
     public class MicroConsumerUserApplication {}
     ```
-
-
 
 ### 四. 参考资料
 
