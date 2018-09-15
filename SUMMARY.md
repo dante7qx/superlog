@@ -62,6 +62,7 @@
 * CaaS
 
   - [OpenShift](CaaS/OpenShift.md)
-
   - [Helm](CaaS/Helm 指南.md)
+* Kong
+  - [Kong](Kong/Kong.md)
 

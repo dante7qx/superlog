@@ -14,7 +14,7 @@
 
 Spring Cloud 应用通过一个 "bootstrap" 上下文进行启动，该上下文可以共享环境变量。Bootstrap 的配置具有最高优先级，故应该把那些不变的配置信息都放在 ***bootstrap.yml*** 中，例：spring.application.name。通过设置下面的配置，可以禁用 bootstrap  `spring.cloud.bootstrap.enabled=false`。
 
-​	Spring应用上下文工作流程
+	Spring应用上下文工作流程
 
 	1. 启动 bootstrap context
 	2. 子上下文从父上下文中继承配置信息 和 Profiles，并且子上下文的配置会覆盖父上下文的配置。
@@ -254,11 +254,11 @@ encrypt:
 
 #### 1. RefreshScope（手动）
 
-​	Spring的@Bean添加 @RefreshScope注解。RefreshScope是上下文中的一个bean，它有一个公共方法refreshAll（）通过清除目标缓存来刷新作用域中的所有bean。还有一个刷新（String）方法来按名称刷新单个的bean。
+	Spring的@Bean添加 @RefreshScope注解。RefreshScope是上下文中的一个bean，它有一个公共方法refreshAll（）通过清除目标缓存来刷新作用域中的所有bean。还有一个刷新（String）方法来按名称刷新单个的bean。
 
 #### 2. Spring Cloud Bus（自动）
 
-​	Spring Cloud Bus将分布式应用和MQ连接，可以背看作一个分布式的 actuator，通过AMQP传输信息。然后在actuator端点前添加  /bus，即 /bus/refresh。这样消息会通知所有添加 spring-cloud-starter-bus-* 的微服务，这些微服务相当调用了自己的 /refresh 端点。
+	Spring Cloud Bus将分布式应用和MQ连接，可以背看作一个分布式的 actuator，通过AMQP传输信息。然后在actuator端点前添加  /bus，即 /bus/refresh。这样消息会通知所有添加 spring-cloud-starter-bus-* 的微服务，这些微服务相当调用了自己的 /refresh 端点。
 
 - 添加依赖
 
@@ -308,3 +308,4 @@ encrypt:
 
 - http://baike.baidu.com/link?url=zWBvX8st-03jVTL4wLTOt6XkD-py836ELVXrUaD3WypZnBUsB7z_8l900tmihhjm_EyILhD7tgs6YWo13SPcU0szzD9RfadiVqTJdSIeZoCyPwwpx_tM_ELCm34xUPxLYALQb_ErxytsxvCZZoUgjJiuPJBFxAervuKqbkATDq3
 - https://my.oschina.net/frankies/blog/344914
+- https://github.com/dyc87112/spring-cloud-config-admin

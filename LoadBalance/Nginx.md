@@ -58,7 +58,7 @@ master_process on | of 默认on
 - server块：配置虚拟主机的相关参数，一个http中可以有多个server。
 - location块：配置请求的路由，以及各种页面的处理情况，一个server可以用多个location。
 
-```json
+```nginx
 ## Nginx用户及组：用户 组。window下不指定。user nginx nginx
 #user  nobody;
 
@@ -204,9 +204,9 @@ http {
 
 #### 2. 反向代理
 
-​	反向代理（Reverse Proxy）方式是指以代理服务器来接受internet上的连接请求，然后将请求转发给内部网络上的服务器，并将从服务器上得到的结果返回给internet上请求连接的客户端，此时代理服务器对外就表现为一个反向代理服务器。简单来说就是真实的服务器不能直接被外部网络访问，所以需要一台代理服务器，而代理服务器能被外部网络访问的同时又跟真实服务器在同一个网络环境，当然也可能是同一台服务器，端口不同而已。
+	反向代理（Reverse Proxy）方式是指以代理服务器来接受internet上的连接请求，然后将请求转发给内部网络上的服务器，并将从服务器上得到的结果返回给internet上请求连接的客户端，此时代理服务器对外就表现为一个反向代理服务器。简单来说就是真实的服务器不能直接被外部网络访问，所以需要一台代理服务器，而代理服务器能被外部网络访问的同时又跟真实服务器在同一个网络环境，当然也可能是同一台服务器，端口不同而已。
 
-```json
+```nginx
 server {
 	listen       8080;
 	server_name  localhost;
@@ -234,11 +234,11 @@ server {
 
 #### 3. 负载均衡
 
-​	Nginx作为一个非常有效的HTTP负载平衡器，将流量分配给多个应用服务器，并通过nginx提高Web应用程序的性能，可扩展性和可靠性。Nginx 本身支持3种负载策略：
+	Nginx作为一个非常有效的HTTP负载平衡器，将流量分配给多个应用服务器，并通过nginx提高Web应用程序的性能，可扩展性和可靠性。Nginx 本身支持3种负载策略：
 
 - **round-robin**（轮询）：默认的策略。每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down掉，能自动剔除。
 
-```json
+```nginx
 upstream test {
 	server localhost:8100;
 	server localhost:8101;
@@ -262,7 +262,7 @@ server {
 
 - **least-connected** （最少连接）：nginx将不会在负载很忙的服务器上增加请求，而是分发新的请求到不忙的服务器上面。
 
-```json
+```nginx
 upstream test {
     least_conn;
     server localhost:8100;
@@ -273,7 +273,7 @@ upstream test {
 
 - **ip-hash**：将客户端的IP作为一个 hashing key，绑定到负载池中的一台服务器。每个访客（IP固定）就会固定的访问一个后段的服务（除非后台服务器宕机），可以解决session等有状态的问题。
 
-```json
+```nginx
 upstream test {
     ip_hash;
     server localhost:8100;
@@ -285,7 +285,7 @@ upstream test {
 - **weighted**（权重）：指定轮询几率，weight和访问比率成正比，用于后端服务器性能不均的情况。 如果后端服务器down掉，能自动剔除。 ==least_conn、ip_hash 策略也可指定 weight==。
 
 
-```json
+```nginx
 upstream test {
     server localhost:8100 weight=5;
     server localhost:8101 weight=3;
@@ -327,3 +327,4 @@ USER 1001
 - https://segmentfault.com/a/1190000002797606
 - http://www.cnblogs.com/pycode/p/6588896.html
 - https://zhongwuzw.github.io/2016/09/24/%E8%B0%83%E6%95%B4Nginx%E7%9A%84%E7%BD%91%E7%AB%99%E6%A0%B9%E7%9B%AE%E5%BD%95/
+- https://www.cnblogs.com/SummerinShire/p/7410557.html (配置优化)
