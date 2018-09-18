@@ -126,7 +126,7 @@ docker run --rm \
     -e "KONG_PG_HOST=kong-db" \
     -e "KONG_PG_PORT=5432" \
     -e "KONG_PG_PASSWORD=kong123" \
-    kong:0.14.1 kong migrations up
+    kong:0.14.1-centos kong migrations up
 
 ## 启动 Kong Server
 docker run -d --name kong \
@@ -144,7 +144,7 @@ docker run -d --name kong \
     -p 8443:8443 \
     -p 8001:8001 \
     -p 8444:8444 \
-    kong:0.14.1
+    kong:0.14.1-centos
 ```
 
 ##### 2) caas 集群
@@ -153,11 +153,7 @@ docker run -d --name kong \
 2. 在CaaS外初始化 kong db
 3. 启动 kong server
 
-### 三. 原理
-
-
-
-### 四. 术语
+### 三. 术语
 
 #### 1. Service
 
@@ -428,7 +424,7 @@ https://docs.konghq.com/0.14.x/admin-api/#sni-objects
 | name           | hostname                                                  |
 | certificate.id | 证书对象的主键Id。"certificate":{"id":"<certificate_id>"} |
 
-### 五. 实例
+### 四. 实例
 
 #### 1. 负载均衡
 
@@ -630,13 +626,11 @@ POST http://localhost:8001/routes/b127b5aa-2481-4cf3-a4a8-889dc52bb5bb/plugins/
 }
 ```
 
-
-
-### 六. 自定义插件
+### 五. 自定义插件
 
 。。。
 
-### 七. 参考资料
+### 六. 参考资料
 
 - https://docs.konghq.com
 - https://hub.docker.com/_/postgres/
