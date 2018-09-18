@@ -2,9 +2,9 @@
 
 ### 一. 概念
 
-Kong
+​	kong 是一个基于 Nginx / OpenResty / Lua 封装的开源 API 网关产品。L7 层代理 Http 流量，不能代理基于 TCP 的RPC请求。可以通过 Kong 的插件实现认证授权、IP限制、限流等公用功能。从技术的角度讲，Kong 可以认为是一个 OpenResty 应用程序。 OpenResty 运行在 Nginx 之上，使用 Lua 扩展了 Nginx。 Lua 是一种非常容易使用的脚本语言，可以让你在 Nginx 中编写一些逻辑操作。
 
-
+![Kong 架构](./Kong 架构.png)
 
 ### 二. 安装
 
@@ -15,11 +15,15 @@ Kong
 ```sh
 docker pull postgres:10
 docker run -d --name dante-postgres -p 5432:5432 \
--v <本地目录>:/var/lib/postgresql/data \
--e POSTGRES_PASSWORD=****** postgres:10
+		   -v <本地目录>:/var/lib/postgresql/data \
+		   -e POSTGRES_PASSWORD=****** \
+		   -e POSTGRES_USER: kong \
+      	   -e POSTGRES_DB: kong \
+		   postgres:10
 ```
 
 ```sql
+-- 非 docker 安装，要初始化用户、密码
 create user kong;
 create database kong owner kong;
 alter user kong with password '*****';
@@ -58,7 +62,7 @@ kong reload
 
    vi /usr/local/opt/kong/.kong_env，修改 
 
-   admin_listen = 127.0.0.1:8001,127.0.0.1:8444 ssl => admin_listen = 0.0.0.0:8001,0.0.0.0:8444 ssl
+   **admin_listen = 127.0.0.1:8001,127.0.0.1:8444 ssl => admin_listen = 0.0.0.0:8001,0.0.0.0:8444 ssl**
 
 #### 3. Kong UI
 
@@ -71,6 +75,83 @@ docker run -d -p 1337:1337  --name dante-kong-ui -e "NODE_ENV=development" -e "T
 
 ## 访问 http://localhost:1337
 ```
+
+#### 4. 集群
+
+​	Kong node 共享配置，连接同一个数据库（或集群），各节点通过负载均衡器实现流量分配。但要注意，只能够在一个 Node 上执行 Kong 的数据初始化操作，即 `kong migrations up` 。
+
+![Kong Cluster](./Kong Cluster.png)
+
+​	考虑到性能问题，Kong 在代理请求时，只在第一次访问数据库，之后都会从内存中获取需要的对象内容（Service、Route、Consumer、Plugin、Upstream、Target等）。那么，当一个Node上通过 Admin API 进行修改时，要如何将这些修改传播到其他的 Node？
+
+- db_update_frequency（默认 5 秒）
+
+  所有 Node 在后台会周期性（db_update_frequency）的轮询 DB，找出修改内容并更新自己 Node 的内存。例如：Node A 删除了一个 Service，那么 Node B 在下次轮询 DB前，这个 Service 一直存在在 Node B。即，Kong 采用的是最终一致性。
+
+- db_update_propagation（默认 0 秒）
+
+  对于最终一致性的数据库（Cassandra），需要设置此配置，确保 DB Cluster 各节点的数据同步。所以，当设置了此配置，则 **Kong Node 更新缓存时间 = db_update_frequency + db_update_propagation**。
+
+- db_cache_ttl（默认 0 秒） 
+
+  缓存的持久（过期）时间，当到期时，从缓存中清除数据，直接从 DB 中获取。默认是 0，表示缓存没有过期时间（一致有效）。
+
+##### 1) docker 集群
+
+- 自定义网络
+
+```shell
+docker network create kong-net
+```
+
+- postgres
+
+```shell
+docker run -d --name kong-db \
+              --network=kong-net \
+              -p 5432:5432 \
+              -e "POSTGRES_PASSWORD=kong123" \
+              -e "POSTGRES_USER=kong" \
+              -e "POSTGRES_DB=kong" \
+              postgres:10
+```
+
+- kong
+
+```shell
+## 初始化 kong db（只能在唯一一个 Node 上执行一次）
+docker run --rm \    
+    --network=kong-net \
+    -e "KONG_DATABASE=postgres" \
+    -e "KONG_PG_HOST=kong-db" \
+    -e "KONG_PG_PORT=5432" \
+    -e "KONG_PG_PASSWORD=kong123" \
+    kong:0.14.1 kong migrations up
+
+## 启动 Kong Server
+docker run -d --name kong \
+    --network=kong-net \
+    -e "KONG_DATABASE=postgres" \
+    -e "KONG_PG_HOST=kong-db" \
+    -e "KONG_PG_PORT=5432" \
+    -e "KONG_PG_PASSWORD=kong123" \
+    -e "KONG_PROXY_ACCESS_LOG=/dev/stdout" \
+    -e "KONG_ADMIN_ACCESS_LOG=/dev/stdout" \
+    -e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
+    -e "KONG_ADMIN_ERROR_LOG=/dev/stderr" \
+    -e "KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl" \
+    -p 8000:8000 \
+    -p 8443:8443 \
+    -p 8001:8001 \
+    -p 8444:8444 \
+    kong:0.14.1
+```
+
+##### 2) caas 集群
+
+1. 先安装 Postgres
+2. 在CaaS外初始化 kong db
+3. 启动 kong server
 
 ### 三. 原理
 
@@ -322,11 +403,30 @@ POST        /upstreams/{name or id}/targets
 
 #### 7. Certificate
 
-...
+表示SSL证书的密钥对。Kong 使用它处理 SSL 加密的请求。可以关联 SNI 匹配一个或多个域名。
+
+https://docs.konghq.com/0.14.x/admin-api/#certificate-object
+
+创建一个 Certificate，POST        /certificates
+
+| 参数 | 说明                       |
+| ---- | -------------------------- |
+| cert | PEM-encoded 的 public key  |
+| key  | PEM-encoded 的 private key |
+| snis | 可选。数组 ["example.com"] |
 
 #### 8. SNI
 
-...
+表示主机名与证书的多对一映射。Kong 收到 SSL 请求后，通过 SNI 去查找证书。
+
+https://docs.konghq.com/0.14.x/admin-api/#sni-objects
+
+创建一个 SNI，POST        /snis
+
+| 参数           | 说明                                                      |
+| -------------- | --------------------------------------------------------- |
+| name           | hostname                                                  |
+| certificate.id | 证书对象的主键Id。"certificate":{"id":"<certificate_id>"} |
 
 ### 五. 实例
 
@@ -392,7 +492,7 @@ curl -X POST http://localhost:8001/upstreams/klb/targets --data "target=127.0.0.
 
 #### 2. 蓝绿部署
 
-​	不停止老版本（绿版本），再部署一套新版本（蓝版本）。当新版本测试没有问题，通过负载（或者反向代理或者路由）将流量全部打到蓝版本，绿版本可以保存版本，然后再升级成蓝版本，接受新流量。适用于增量升级，对于涉及数据表结构变更等等不可逆转的升级，并不完全合适用蓝绿发布来实现，需要结合一些业务的逻辑以及数据迁移与回滚的策略才可以完全满足需求。
+	不停止老版本（绿版本），再部署一套新版本（蓝版本）。当新版本测试没有问题，通过负载（或者反向代理或者路由）将流量全部打到蓝版本，绿版本可以保存版本，然后再升级成蓝版本，接受新流量。适用于增量升级，对于涉及数据表结构变更等等不可逆转的升级，并不完全合适用蓝绿发布来实现，需要结合一些业务的逻辑以及数据迁移与回滚的策略才可以完全满足需求。
 
 优点
 
@@ -433,7 +533,7 @@ PATCH http://localhost:8001/services/klb-service
 
 #### 3. A/B 测试
 
-​	A/B 测试，为了同一个目标制定两个方案（例如两个页面），让一部分用户使用 A 方案，另一部分用户使用 B 方案，通过用户的访问记录等数据确定更优的方案，接受更多的用户。A/B 测试主要是产品设计和运营的一种手段，核心思想是
+	A/B 测试，为了同一个目标制定两个方案（例如两个页面），让一部分用户使用 A 方案，另一部分用户使用 B 方案，通过用户的访问记录等数据确定更优的方案，接受更多的用户。A/B 测试主要是产品设计和运营的一种手段，核心思想是
 
 - 多个方案并行测试
 - 每个方案的不同点要明确、突出
@@ -449,7 +549,7 @@ PATCH http://localhost:8001/services/klb-service
 
 #### 4. 灰度发布（金丝雀）
 
-​	也叫做**金丝雀发布**。是指在黑与白之间，能够平滑过渡的一种发布方式。整个发布过程包含 A/B 测试。灰度发布可以保证整体系统的稳定，在初始灰度的时候就可以发现、调整问题，以保证其影响度。灰度期：灰度发布开始到结束期间的这一段时间，称为灰度期。技术上一般通过设置路由权重，动态调整不同的权重来实现。
+	也叫做**金丝雀发布**。是指在黑与白之间，能够平滑过渡的一种发布方式。整个发布过程包含 A/B 测试。灰度发布可以保证整体系统的稳定，在初始灰度的时候就可以发现、调整问题，以保证其影响度。灰度期：灰度发布开始到结束期间的这一段时间，称为灰度期。技术上一般通过设置路由权重，动态调整不同的权重来实现。
 
 适用场景
 
@@ -463,7 +563,7 @@ BAT公司的灰度发布：https://www.zhihu.com/question/28296375
 
 #### 5. 滚动发布
 
-​	Rolling update，k8s pod 的升级就是滚动更新的。一般是取出一个或者多个服务实例停止服务，执行更新，并重新将其投入使用。周而复始，直到集群中所有的实例都更新成新版本。这种发布的方式可以节省资源，都是自动化进行的，节省人力。
+	Rolling update，k8s pod 的升级就是滚动更新的。一般是取出一个或者多个服务实例停止服务，执行更新，并重新将其投入使用。周而复始，直到集群中所有的实例都更新成新版本。这种发布的方式可以节省资源，都是自动化进行的，节省人力。
 
 缺点
 
@@ -473,7 +573,70 @@ BAT公司的灰度发布：https://www.zhihu.com/question/28296375
 - 会出现短暂的新老版本不一致的情况（可使用 k8s readiness 和 liveness 解决）
 - 和自动扩容/缩容同时进行时，不好掌控
 
-### 六. 参考资料
+#### 6. 限流控制
+
+。。。
+
+#### 7. Zipkin
+
+- 启动 zipkin server
+
+```shell s
+docker run -d --name dante-zipkin -p 9411:9411 openzipkin/zipkin
+```
+
+- 配置全局 Plugin — https://docs.konghq.com/plugins/zipkin
+
+```json
+POST	http://localhost:8001/plugins/
+{
+    "name": "zipkin",
+    "config": {
+        "http_endpoint": "http://localhost:9411/api/v2/spans",
+        "sample_ratio": 0.1
+    }
+}
+```
+
+| 参数                 | 说明                                                         |
+| -------------------- | ------------------------------------------------------------ |
+| name                 | 插件名称，这里必须是 zipkin                                  |
+| config.http_endpoint | zipkin server 收集 Endpoint（/api/v2/spans）。                                                       参考 https://zipkin.io/zipkin-api/ |
+| config.sample_ratio  | 采样率。0 表示不采集，1 表示全部采集。默认0.001。            |
+| enabled              | 是否启用词插件。默认 true                                    |
+| service_id           | Kong service 主键                                            |
+| route_id             | Kong route 主键                                              |
+| consumer_id          | Kong consumer 主键                                           |
+
+#### 8. IP 限制
+
+。。。
+
+#### 9. 文件日志
+
+将请求/响应数据添加到文件中，不适用于 PROD 环境。因为此插件使用的是阻塞IO，会损害性能。
+
+https://docs.konghq.com/plugins/file-log
+
+- 配置针对 route 的 plugin
+
+```json
+POST http://localhost:8001/routes/b127b5aa-2481-4cf3-a4a8-889dc52bb5bb/plugins/
+{
+    "name": "file-log",
+    "config": {
+        "path": "/Users/dante/Desktop/file-log.log"
+    }
+}
+```
+
+
+
+### 六. 自定义插件
+
+。。。
+
+### 七. 参考资料
 
 - https://docs.konghq.com
 - https://hub.docker.com/_/postgres/
@@ -484,4 +647,5 @@ BAT公司的灰度发布：https://www.zhihu.com/question/28296375
 - https://www.jianshu.com/p/79aba394a561
 - https://www.cnblogs.com/zhoujie/p/kong4.html
 - http://www.itdaan.com/blog/2018/04/08/82ed0c2c2c360e9b4deee4cfec61dc60.html
+- https://github.com/liyuntao/kong-init
 

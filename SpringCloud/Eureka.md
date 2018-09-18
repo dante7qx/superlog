@@ -2,7 +2,7 @@
 
 ### 一. 概念
 
-​	Netflix的Service Discovery Server and Client，基于REST的服务，Spring Cloud将它集成在其子项目spring-cloud-netflix中，以实现服务发现功能。 用于服务发现。非常容易进行**HA**配置，每个集群服务间相互复制注册到Server上的Service。
+	Netflix的Service Discovery Server and Client，基于REST的服务，Spring Cloud将它集成在其子项目spring-cloud-netflix中，以实现服务发现功能。 用于服务发现。非常容易进行**HA**配置，每个集群服务间相互复制注册到Server上的Service。
 
 - 中间层的负载均衡
 - 使用 Netflix 的红/黑部署(red/black deployments)，使开发者更加容易实现云部署
@@ -16,15 +16,15 @@
 
 ![Eureka-HA](./Eureka-HA.png)
 
-​	每个区域（Region，本例中只有一个Region）中都有一个 Eureka Cluster，它具有所有Service的注册信息，Eureka Server之间相互复制注册信息，确保总有一个Eureka Server可以处理区域故障。
+	每个区域（Region，本例中只有一个Region）中都有一个 Eureka Cluster，它具有所有Service的注册信息，Eureka Server之间相互复制注册信息，确保总有一个Eureka Server可以处理区域故障。
 
-​	Application Service 向 Eureka Server 注册服务，默认30s/次发送心跳（heartbeats）进行续租（renew），如果 Client 出现几次续租中断，3次心跳后，即90秒后，服务将从Eureka Server中去除。注册表和续租信息被复制到集群中其他Eureka Server中。
+	Application Service 向 Eureka Server 注册服务，默认30s/次发送心跳（heartbeats）进行续租（renew），如果 Client 出现几次续租中断，3次心跳后，即90秒后，服务将从Eureka Server中去除。注册表和续租信息被复制到集群中其他Eureka Server中。
 
-​	任何Zone（例：us-east-1）中的Client，30s/次从Eureka Server中获取它们需要的注册服务信息，进行远程调用。
+	任何Zone（例：us-east-1）中的Client，30s/次从Eureka Server中获取它们需要的注册服务信息，进行远程调用。
 
 ### 二. Client 和 Server 交互方式
 
-​	所有的交互均是通过Eureka REST API进行的。默认 EurekaClient 使用 Jersey 进行 Http 通信。若要使用 RestTemplate 进行交互（禁用Jersey），则需要进行如下配置。这样做的好处如下：
+	所有的交互均是通过Eureka REST API进行的。默认 EurekaClient 使用 Jersey 进行 Http 通信。若要使用 RestTemplate 进行交互（禁用Jersey），则需要进行如下配置。这样做的好处如下：
 
 	1. 不用考虑 Jersey 的版本冲突问题，Jersey 1.x与2.x并不兼容。
 	2. 减少了项目的依赖。
@@ -50,24 +50,24 @@
 </dependency>
 ```
 
-​	**Register 注册** 
+	**Register 注册** 
 
-​	**Renew 续租**
+	**Renew 续租**
 
 ```html
 	Eureka client needs to renew the lease by sending heartbeats every 30 seconds. The renewal informs the Eureka server that the instance is still alive. If the server hasn't seen a renewal for 90 seconds, it removes the instance out of its registry. It is advisable not to change the renewal interval since the server uses that information to determine if there is a wide spread problem with the client to server communication.
 ```
 
-​	**Fetch Registry 抓取注册信息**
+	**Fetch Registry 抓取注册信息**
 
 ```html
 	Client向Server抓取注册信息并且缓存本地。之后，Client用本地Cache查找服务。该信息通过在最后一个获取周期和当前提取周期之间获取增量来定期更新（每30秒钟）更新一次。 增量信息在Server中保持较长时间（约3分钟），因此增量获取可能会再次返回相同的实例。 Eureka客户端自动处理重复信息。
 	增量更新后，与Server比较。若信息不匹配，将会重新获取整个注册信息。Eureka Server以JSON/XML的格式缓存【全注册表、增量更新、每个服务】，Client通过 jersey apache client 来获取信息。
 ```
 
-​	**Cancel 取消注册**
+	**Cancel 取消注册**
 
-​	**网络中断**
+	**网络中断**
 
 ```md
 1、peers之间的心跳复制将会中断，Server检测到这种情况时会进入保护当前状态的自我保护模式。（默认开启自我保护模式）
@@ -327,4 +327,3 @@ eureka:
 -  http://cloud.spring.io/spring-cloud-static/Dalston.SR1/#_appendix_compendium_of_configuration_properties
 -  https://github.com/spring-cloud/spring-cloud-netflix/issues/203
 -  https://mp.weixin.qq.com/s?__biz=MzI4ODQ3NjE2OA==&mid=2247483802&idx=1&sn=a3c10280d3345b0aa6ae9030bd744da0&chksm=ec3c9cfddb4b15eb3d213cfd3e060b08e81abbef112bdcb1c9c567eaa86f4558a7525b87a717&scene=0&key=dde1e3347992b369768d2b2d1deb375789428e10ac0f88e4629c83ebce894940d655dca10ef6e643300e6e28cbc7c6e80f0eef5952b3c8cb83898718079d9a802eda802d5f76722376b82e288809533d&ascene=0&uin=MTY1MzQxMzYxNg%3D%3D&devicetype=iMac+MacBookPro12%2C1+OSX+OSX+10.13.1+build(17B48)&version=12020010&nettype=WIFI&fontScale=100&pass_ticket=zlmRG2xqtSMMkJfOmIRopAZZZfIjfZWP8HA4vjsZ%2FTFnnkYNJh0kiAIw0yJ3YvTI
-
