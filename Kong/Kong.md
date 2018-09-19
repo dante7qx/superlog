@@ -2,7 +2,7 @@
 
 ### 一. 概念
 
-​	kong 是一个基于 Nginx / OpenResty / Lua 封装的开源 API 网关产品。L7 层代理 Http 流量，不能代理基于 TCP 的RPC请求。可以通过 Kong 的插件实现认证授权、IP限制、限流等公用功能。从技术的角度讲，Kong 可以认为是一个 OpenResty 应用程序。 OpenResty 运行在 Nginx 之上，使用 Lua 扩展了 Nginx。 Lua 是一种非常容易使用的脚本语言，可以让你在 Nginx 中编写一些逻辑操作。
+	kong 是一个基于 Nginx / OpenResty / Lua 封装的开源 API 网关产品。L7 层代理 Http 流量，不能代理基于 TCP 的RPC请求。可以通过 Kong 的插件实现认证授权、IP限制、限流等公用功能。从技术的角度讲，Kong 可以认为是一个 OpenResty 应用程序。 OpenResty 运行在 Nginx 之上，使用 Lua 扩展了 Nginx。 Lua 是一种非常容易使用的脚本语言，可以让你在 Nginx 中编写一些逻辑操作。
 
 ![Kong 架构](./Kong 架构.png)
 
@@ -78,11 +78,11 @@ docker run -d -p 1337:1337  --name dante-kong-ui -e "NODE_ENV=development" -e "T
 
 #### 4. 集群
 
-​	Kong node 共享配置，连接同一个数据库（或集群），各节点通过负载均衡器实现流量分配。但要注意，只能够在一个 Node 上执行 Kong 的数据初始化操作，即 `kong migrations up` 。
+	Kong node 共享配置，连接同一个数据库（或集群），各节点通过负载均衡器实现流量分配。但要注意，只能够在一个 Node 上执行 Kong 的数据初始化操作，即 `kong migrations up` 。
 
 ![Kong Cluster](./Kong Cluster.png)
 
-​	考虑到性能问题，Kong 在代理请求时，只在第一次访问数据库，之后都会从内存中获取需要的对象内容（Service、Route、Consumer、Plugin、Upstream、Target等）。那么，当一个Node上通过 Admin API 进行修改时，要如何将这些修改传播到其他的 Node？
+	考虑到性能问题，Kong 在代理请求时，只在第一次访问数据库，之后都会从内存中获取需要的对象内容（Service、Route、Consumer、Plugin、Upstream、Target等）。那么，当一个Node上通过 Admin API 进行修改时，要如何将这些修改传播到其他的 Node？
 
 - db_update_frequency（默认 5 秒）
 
@@ -552,6 +552,7 @@ PATCH http://localhost:8001/services/klb-service
 - 不停止老版本，额外搞一套新版本，不同版本应用共存
 - 灰度发布中，常常按照用户设置路由权重，例如90%的用户维持使用老版本，10%的用户尝鲜新版本
 - 与A/B测试一起使用，要确定更优的产品方案
+- 切换灰度发布（也叫刚性灰度发布），即在灰度发布的时候，没有过渡过程，流量直接从旧版本切换到新版本
 
 人人都是产品经理：http://www.woshipm.com/pmd/573429.html
 

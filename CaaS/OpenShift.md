@@ -1,6 +1,8 @@
 ## OpenShift
 
-### 1. 本地安装
+### 一. 开发
+
+#### 1. 本地安装
 
 ```sh
 bogon:~ dante$ oc cluster up --docker-machine='openshift'
@@ -18,7 +20,7 @@ You are logged in as:
     Password: <any value>
 ```
 
-### 2. 用户认证
+#### 2. 用户认证
 
 1. 当前 Session Token
 
@@ -37,13 +39,13 @@ You are logged in as:
    curl -H "Authorization: Bearer RS4pGtCc9wY-6loYtxRvwto_E7IGbu7kHWkw7osl0sg" "https://10.70.94.90:8443/oapi/v1/users/~"
    ```
 
-### 3. BuildConfig
+#### 3. BuildConfig
 
-#### 3.1 概念
+##### 3.1 概念
 
 BuildConfig 是一个定义从 Input（参数、源码） 到 Output（可运行 Image）的描述对象。
 
-#### 3.2 主要内容
+##### 3.2 主要内容
 
 - **Source Clone Secrets** 
 
@@ -84,7 +86,7 @@ BuildConfig 是一个定义从 Input（参数、源码） 到 Output（可运行
   ```
 
 
-#### 3.3 CLI
+##### 3.3 CLI
 
 ```shell
 ## 创建 Java Image Stream
@@ -100,11 +102,9 @@ oc import-image tomcat:8.0 --from=harbor.testos39.com/openshift/tomcat:8.0 --ins
     tags: builder,java
 ```
 
+#### 4. S2I
 
-
-### 4. S2I
-
-#### 4.1. 安装 
+##### 4.1. 安装 
 
 （https://github.com/openshift/source-to-image/blob/master/README.md#installation）
 
@@ -112,7 +112,7 @@ oc import-image tomcat:8.0 --from=harbor.testos39.com/openshift/tomcat:8.0 --ins
 brew install source-to-image
 ```
 
-#### 4.2. 构建流程
+##### 4.2. 构建流程
 
 - 要素
 
@@ -124,7 +124,7 @@ brew install source-to-image
 
 ![S2I 流程](/Users/dante/Documents/Technique/且行且记/CaaS/S2I 流程.png)
 
-#### 3. 工作原理
+##### 4.3. 工作原理
 
 参考：
 
@@ -137,15 +137,15 @@ brew install source-to-image
 
 - assemble
 
-  ​	将外部代码库下载到本地，并编译打包。通过定义 **save-artifacts**，可以进行增量构建（mvn、npm缓存问题）。
+  	将外部代码库下载到本地，并编译打包。通过定义 **save-artifacts**，可以进行增量构建（mvn、npm缓存问题）。
 
 - run 
 
-  ​	运行 assemble 编译好的应用程序包。
+  	运行 assemble 编译好的应用程序包。
 
 - save-artfacts
 
-  ​	save-artifacts脚本负责将构建所需要的所有依赖包收集到一个tar文件中。
+  	save-artifacts脚本负责将构建所需要的所有依赖包收集到一个tar文件中。
 
   **增量构建**
 
@@ -160,7 +160,7 @@ brew install source-to-image
 
 - usage
 
-  ​	使用说明文档。
+  	使用说明文档。
 
   ```bash
   #!/bin/bash -e
@@ -173,9 +173,9 @@ brew install source-to-image
 
   测试。
 
-#### 4. 示例
+##### 4.4. 示例
 
-##### 4.1 Java
+##### 1)  Java
 
 **环境变量参数**
 
@@ -305,7 +305,13 @@ tar cf - ./.m2
 popd >/dev/null
 ```
 
-### 5. Template
+#### 5. Template
+
+
+
+### 二. 管理
+
+
 
 
 
