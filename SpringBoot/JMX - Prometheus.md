@@ -18,6 +18,14 @@ java -jar $JAVA_OPTS $JAVA_OPTS $ENV_OPTS -jar xx.jar
 nohup java -jar $JAVA_OPTS $JAVA_OPTS $ENV_OPTS -jar xx.jar >nohup 2>&1 &
 ```
 
+Java 提供了 jconsole 用来通过 JMX 监控 Java 应用
+
+```shell
+bogon:JMeter dante$ jconsole 
+```
+
+![jconsole](./JMX-Prometheus/jconsole.png)
+
 **JMX_exporter**
 
 	使用 Prometheus 收集指标本地 JVM Metrics（作为代理运行），或者作为独立 HTTP Server 抓取远程 JMX 目标，参考：https://github.com/prometheus/jmx_exporter 。
