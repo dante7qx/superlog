@@ -2,9 +2,9 @@
 
 ### 一. 概念
 
-​	SpringSource和Accenture（埃森哲) 合作，基于Java开发的一套用于处理企业级批处理框架。Spring batch为处理大批量数据提供了很多必要的可重用功能，比如日志追踪、事务管理、job执行统计、重启job和资源管理等。同时它也提供了优化和分片技术用于实现高性能的批处理任务。
+	SpringSource和Accenture（埃森哲) 合作，基于Java开发的一套用于处理企业级批处理框架。Spring batch为处理大批量数据提供了很多必要的可重用功能，比如日志追踪、事务管理、job执行统计、重启job和资源管理等。同时它也提供了优化和分片技术用于实现高性能的批处理任务。
 
-​	批处理，即在大型企业中，由于业务复杂、数据量大、数据格式不同、数据交互格式繁杂，并非所有的操作都能通过交互界面进行处理。而有一些操作需要定期读取大批量的数据，然后进行一系列的后续处理。
+	批处理，即在大型企业中，由于业务复杂、数据量大、数据格式不同、数据交互格式繁杂，并非所有的操作都能通过交互界面进行处理。而有一些操作需要定期读取大批量的数据，然后进行一系列的后续处理。
 
 #### 使用场景
 
@@ -20,7 +20,7 @@
 
 #### 架构
 
-![总体架构](/Users/dante/Documents/Technique/且行且记/SpringBoot/springbatch/总体架构.png)
+![总体架构](./springbatch/总体架构.png)
 
 - 应用程序：使用SpringBatch编写的job和业务逻辑。
 - Batch Core：包括 JobRepository、JobLaunch、Job、Step、Execution、Listener等。
@@ -44,7 +44,7 @@ public class CustomClass {
 
 **基本架构**
 
-![简单架构](/Users/dante/Documents/Technique/且行且记/SpringBoot/springbatch/简单架构.png)
+![简单架构](./springbatch/简单架构.png)
 
 ### 二. Job
 
@@ -66,17 +66,17 @@ Step的容器，实际要执行的任务。Job ——> * JobInstance（* JobPara
 
 ### 三. Step
 
-​	步骤，控制批处理的具体逻辑。**StepExecution**，每次运行 **Step** 时都会创建一个新的**StepExecution**，类似于JobExecution。==（不同点： if a step fails to execute because the step before it fails, there will be no execution persisted for it. ）== **StepExecution** 只有在**Step**实际启动时才会创建。
+	步骤，控制批处理的具体逻辑。**StepExecution**，每次运行 **Step** 时都会创建一个新的**StepExecution**，类似于JobExecution。==（不同点： if a step fails to execute because the step before it fails, there will be no execution persisted for it. ）== **StepExecution** 只有在**Step**实际启动时才会创建。
 
 ##### ExecutionContext
 
-​	key/value对的对象，用于保存需要记录的上下文信息。scope是包括StepExecution和JobExecution。可以保存执行过程的信息，用于故障时重新执行和继续执行，甚至状态回滚等等，不过需要用户自行记录。另外：每个JobExectuion都有一个ExecutionContext，每个StepExecution也有一个独立的ExecutionContext。
+	key/value对的对象，用于保存需要记录的上下文信息。scope是包括StepExecution和JobExecution。可以保存执行过程的信息，用于故障时重新执行和继续执行，甚至状态回滚等等，不过需要用户自行记录。另外：每个JobExectuion都有一个ExecutionContext，每个StepExecution也有一个独立的ExecutionContext。
 
 Step中的context是在每个提交点上被保存，而job的context会在两个Step执行之间被保存。
 
 ##### Chunk 机制
 
-​	每次读取一条数据，再处理一条数据，累积到一定数量后再一次性交给writer进行写入操作。这样可以最大化的优化写入效率，整个事务也是基于Chunk来进行。
+	每次读取一条数据，再处理一条数据，累积到一定数量后再一次性交给writer进行写入操作。这样可以最大化的优化写入效率，整个事务也是基于Chunk来进行。
 
  - File 和 DB 需设置 Chunk
 - WebService 则Chunk=1。这样既可以及时的处理写入，也不会由于整个Chunk中发生异常后，在重试时出现重复调用服务或者重复发送消息的情况。
@@ -98,7 +98,7 @@ public Step step1() {
 
 ##### TaskLetStep
 
-​	对于没有输入输出的场景，例如：存储过程。
+	对于没有输入输出的场景，例如：存储过程。
 
 ```java
 public interface Tasklet {
