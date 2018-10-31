@@ -119,7 +119,7 @@
 
 OAuth关注的是Authorization，即授权，用户能干什么？
 
-OpenID侧重的是 Authentication，即认证，用户是谁？
+OpenID侧重的是Authentication，即认证，用户是谁？
 
 ### 八. 参考资料
 
