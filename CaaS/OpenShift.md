@@ -556,6 +556,7 @@ oc get / describe / export / edit scc
 oc adm policy add-scc-to-user <scc_name> <user/sa>
 oc adm policy add-scc-to-user privileged spiritprd
 oc adm policy add-scc-to-user privileged system:serviceaccount:spiritdev:xbot
+oc adm policy add-scc-to-user privileged system:serviceaccount:spiritdev:default
 ```
 
 创建自定义 SCC

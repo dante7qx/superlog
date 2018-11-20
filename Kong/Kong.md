@@ -2,7 +2,7 @@
 
 ### 一. 概念
 
-	kong 是一个基于 Nginx / OpenResty / Lua 封装的开源 API 网关产品。L7 层代理 Http 流量，不能代理基于 TCP 的RPC请求。可以通过 Kong 的插件实现认证授权、IP限制、限流等公用功能。从技术的角度讲，Kong 可以认为是一个 OpenResty 应用程序。 OpenResty 运行在 Nginx 之上，使用 Lua 扩展了 Nginx。 Lua 是一种非常容易使用的脚本语言，可以让你在 Nginx 中编写一些逻辑操作。
+kong 是一个基于 Nginx / OpenResty / Lua 封装的开源 API 网关产品。L7 层代理 Http 流量，不能代理基于 TCP 的RPC请求。可以通过 Kong 的插件实现认证授权、IP限制、限流等公用功能。从技术的角度讲，Kong 可以认为是一个 OpenResty 应用程序。 OpenResty 运行在 Nginx 之上，使用 Lua 扩展了 Nginx。 Lua 是一种非常容易使用的脚本语言，可以让你在 Nginx 中编写一些逻辑操作。
 
 ![Kong 架构](./Kong 架构.png)
 
