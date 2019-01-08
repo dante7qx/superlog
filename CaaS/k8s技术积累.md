@@ -764,6 +764,7 @@ validate_env && create_config && create_log_props && create_data_dirs && create_
 
 - https://github.com/kubernetes/contrib/blob/master/statefulsets/zookeeper/README.md
 - https://blog.csdn.net/xiaolang85/article/details/13021339
+- https://www.kubernetes.org.cn/1130.html
 
 #### 2. Redis
 

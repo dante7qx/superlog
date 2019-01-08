@@ -153,6 +153,19 @@ docker run -d --name kong \
 2. 在CaaS外初始化 kong db
 3. 启动 kong server
 
+##### 3) k8s ingress
+
+参考：
+
+- https://github.com/Kong/kubernetes-ingress-controller
+- https://raw.githubusercontent.com/Kong/kubernetes-ingress-controller/master/deploy/single/all-in-one-postgres.yaml
+
+##### 4) Openshift
+
+参考：
+
+- https://github.com/Kong/kubernetes-ingress-controller/blob/master/docs/deployment/openshift.md
+
 ### 三. 术语
 
 #### 1. Service

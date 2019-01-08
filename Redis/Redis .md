@@ -46,7 +46,7 @@ make install
 redis-server &
 
 # 指定配置文件启动，生产环境
-redis-server /路径/redis.conf
+redis-server /<path>/redis.conf
 ```
 
 ### 三. 配置
@@ -345,7 +345,7 @@ rename-command CONFIG ""
    redis-server /opt/redis-conf/master.conf 
    redis-server /opt/redis-conf/slave1.conf 
    redis-server /opt/redis-conf/slave2.conf 
-
+   
    ## 开放防火墙端口
    firewall-cmd --zone=public --add-port=6379/tcp --permanent
    firewall-cmd --zone=public --add-port=6380/tcp --permanent
@@ -385,25 +385,25 @@ rename-command CONFIG ""
    port 26379
    daemonize yes
    protected-mode no
-
+   
    dir "/opt/redis-conf/26379/"
    logfile "/opt/redis-conf/sentinel_26379.log"
-
+   
    ## sentinel <option_name> <master_name> <option_value>；#该行的意思是：监控的master的名字叫做T1（自定义）,地址为127.0.0.1:10086，行尾最后的一个2代表在sentinel集群中，多少个sentinel认为masters死了，才能真正认为该master不可用了。
    sentinel monitor spiritmaster 10.71.202.121 6379 2
-
+   
    ## sentinel 连接设置了密码的主和从
    sentinel auth-pass spiritmaster iamdante
-
+   
    ## sentinel会向master发送心跳PING来确认master是否存活，如果master在“一定时间范围”内不回应PONG 或者是回复了一个错误消息，那么这个sentinel会主观地(单方面地)认为这个master已经不可用了(subjectively down, 也简称为SDOWN)。而这个down-after-milliseconds就是用来指定这个“一定时间范围”的，单位是毫秒，默认30秒。
    sentinel down-after-milliseconds spiritmaster 10000
-
+   
    ## failover过期时间，当failover开始后，在此时间内仍然没有触发任何failover操作，当前sentinel将会认为此次failoer失败。默认180秒，即3分钟。
    sentinel failover-timeout spiritmaster 120000
-
+   
    ## 在发生failover主备切换时，这个选项指定了最多可以有多少个slave同时对新的master进行同步，这个数字越小，完成failover所需的时间就越长，但是如果这个数字越大，就意味着越多的slave因为replication而不可用。可以通过将这个值设为 1 来保证每次只有一个slave处于不能处理命令请求的状态。
    sentinel parallel-syncs spiritmaster 1
-
+   
    ## 发生切换之后执行的一个自定义脚本：如发邮件、vip切换等
    # sentinel notification-script <master-name> <script-path>     ##不会执行，疑问？
    # sentinel client-reconfig-script <master-name> <script-path>  ##这个会执行
@@ -415,7 +415,7 @@ rename-command CONFIG ""
    redis-sentinel /opt/redis-conf/sentinel_1.conf
    redis-sentinel /opt/redis-conf/sentinel_2.conf
    redis-sentinel /opt/redis-conf/sentinel_3.conf
-
+   
    ## 开放防火墙端口
    firewall-cmd --zone=public --add-port=26379/tcp --permanent
    firewall-cmd --zone=public --add-port=26380/tcp --permanent
@@ -430,7 +430,7 @@ rename-command CONFIG ""
    SDOWN: subjectively down,直接翻译的为"主观"失效,即当前sentinel实例认为某个redis服务为"不可用"状态.
    ODOWN: objectively down,直接翻译为"客观"失效,即多个sentinel实例都认为master处于"SDOWN"状态,那么此时master将处于ODOWN, ODOWN可以简单理解为master已经被集群确定为"不可用",将会开启failover.
        SDOWN适合于master和slave,但是ODOWN只会使用于master;当slave失效超过"down-after-milliseconds"后,那么所有sentinel实例都会将其标记为"SDOWN".
-
+   
        1) SDOWN与ODOWN转换过程:
    	每个sentinel实例在启动后,都会和已知的slaves/master以及其他sentinels建立TCP连接,并周期性发送PING(默认为1秒)
    	在交互中,如果redis-server无法在"down-after-milliseconds"时间内响应或者响应错误信息,都会被认为此redis-server处于SDOWN状态.

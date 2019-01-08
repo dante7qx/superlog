@@ -30,7 +30,7 @@
 
 - **资源服务器（Resource Server）**
 
-  Github 服务器，处理对资源的请求。
+  Github 服务器，处理对资源的请求。资源服务器和认证服务器可以放到一起，一般关系是多个资源服务器共享一个认证服务器。
 
 #### 2. OAuth流程
 
@@ -124,6 +124,5 @@ OpenID侧重的是Authentication，即认证，用户是谁？
 ### 八. 参考资料
 
 - http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html
-
 - http://jinnianshilongnian.iteye.com/blog/2038646
 - https://www.cnblogs.com/flashsun/p/7424071.html

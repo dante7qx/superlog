@@ -11,7 +11,8 @@
 import org.hibernate.annotations.Proxy;
 @Proxy(lazy = false)
 
-// 方式2 - 不要返回使用DB的映射类，进行转化成 DTO 后再返回
+// 方式2 - 在方法上添加事务注解 
+// 不要返回使用DB的映射类，进行转化成 DTO 后再返回
 UserRespDTO userResp = new UserRespDTO();
 User user = userDao.getOne(id);
 BeanUtils.copyProperties(user, userResp);

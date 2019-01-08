@@ -28,7 +28,7 @@ bogon:JMeter dante$ jconsole
 
 **JMX_exporter**
 
-	使用 Prometheus 收集指标本地 JVM Metrics（作为代理运行），或者作为独立 HTTP Server 抓取远程 JMX 目标，参考：https://github.com/prometheus/jmx_exporter 。
+使用 Prometheus 收集指标本地 JVM Metrics（作为代理运行），或者作为独立 HTTP Server 抓取远程 JMX 目标，参考：https://github.com/prometheus/jmx_exporter 。
 
 1. Java 代理（推荐）
 
