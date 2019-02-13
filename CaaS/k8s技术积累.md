@@ -368,8 +368,15 @@ spec:
 **StatefulSet 的特点**：
 
 - 稳定的，唯一的网络标识 Headless Service，可以用来发现集群内部的其他成员。比如StatefulSet的名字叫 zk，那么第一个起来的 Pod 叫 zk-0，第二个叫 zk-1，依次类推。
+
 - 启动或关闭时保证有序。Pod 启动顺序从 0 —> N-1，关闭顺序从 N-1 —> 0。Pod 死掉后，重新启动的 Pod 的名字不会改变。 
+
+  ```sh
+  $(podname).(headless server name).namespace.svc.cluster.local
+  ```
+
 - 每个Pod一个持久化存储，必须由PersistentVolume Provisioner根据请求的存储类**StorageClass**进行配置。
+
 - 删除一个 StatefulSet，先将 StatefulSet 缩小到 0。
 
 **Headless Service**
@@ -766,9 +773,300 @@ validate_env && create_config && create_log_props && create_data_dirs && create_
 - https://blog.csdn.net/xiaolang85/article/details/13021339
 - https://www.kubernetes.org.cn/1130.html
 
-#### 2. Redis
+#### 2. Eureka
+
+针对 Spring Cloud框架中的服务发现组件 Eureka，使用 k8s 部署高可用。k8s pod 要在部署的时候就知道其他 pod ip 或者域名，保证在启动pod的时候可以互相寻址。
+
+- **Java**
+
+```yaml
+server:
+  port: 8761
+spring:
+  security:
+    user:
+      name: ${REGISTER_USER:dante}
+      password: ${REGISTER_PWD:123456}
+  application:
+    name: ${EUREKA_APPLICATION_NAME:eureka-server}
+  cloud:
+    config:
+      enabled: false
+eureka: 
+  server:
+    enable-self-preservation: false # 关闭自我保护模式
+    peer-node-read-timeout-ms: 1000 # 节点之间读取超时时间（毫秒）
+  instance:
+    hostname: ${EUREKA_HOST_NAME:localhost} # 服务主机名
+    prefer-ip-address: false # 猜测主机名时，优先选择ip。默认为false，使用hostname作为主机名
+  client:
+    register-with-eureka: ${BOOL_REGISTER:false} # 是否把服务中心本身当做eureka client 注册。默认为true
+    fetch-registry: ${BOOL_FETCH:false} # 是否拉取 eureka server 的注册信息。 默认为true
+    service-url:
+      defaultZone: ${EUREKA_URL_LIST:http://${spring.security.user.name}:${spring.security.user.password}@${eureka.instance.hostname}:${server.port}/eureka/}
+  environment: ${RUN_ENV:spirit-dev}
+  datacenter: ${RUN_DATA:spirit-cloud}
+```
+
+- **Docker**
+
+```dockerfile
+FROM java:8
+
+LABEL author="dante"
+LABEL email="sunchao.0129@163.com"
+
+ENV JAVA_OPTS="-Xms1g -Xmx1g"
+ENV TZ=Asia/Shanghai
+ENV APPS_HOME=/AppServer
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
+	&& mkdir -p $APPS_HOME/ \
+	&& rm /bin/sh && ln -s /bin/bash /bin/sh 
+
+WORKDIR $APPS_HOME/	 
+	 
+ADD micro-eureka-k8s-0.0.1-SNAPSHOT.jar app.jar	 
+ADD init.sh init.sh
+
+RUN sh -c 'touch app.jar'
+
+EXPOSE 8761
+
+ENTRYPOINT ["/bin/bash","-c","source init.sh"] 
+```
+
+- **init.sh**
+
+```bash
+#!/usr/bin/env bash
+
+POSTFIX="svc.cluster.local"
+EUREKA_HOST_NAME="$MY_POD_NAME.$MY_INNER_SERVICE.$MY_POD_NAMESPACE.$POSTFIX"
+export EUREKA_HOST_NAME=$EUREKA_HOST_NAME
+REGISTER_USER="$EUREKA_USER"
+REGISTER_PWD="$EUREKA_PWD"
+BOOL_REGISTER="false"
+BOOL_FETCH="false"
+
+if [ $EUREKA_REPLICAS == 1 ]; then
+	EUREKA_URL_LIST="http://$EUREKA_HOST_NAME:8761/eureka/,"
+else 
+	BOOL_REGISTER="true"
+	BOOL_FETCH="true"
+	for ((i=0; i<$EUREKA_REPLICAS; i ++))
+    do
+    	if [ $MY_POD_NAME != "$EUREKA_APPLICATION_NAME-$i" ]; then
+	        temp="http://$REGISTER_USER:$REGISTER_PWD@$EUREKA_APPLICATION_NAME-$i.$MY_INNER_SERVICE.$MY_POD_NAMESPACE.$POSTFIX:8761/eureka/,"
+	        EUREKA_URL_LIST="$EUREKA_URL_LIST$temp"
+        fi
+    done
+fi
+
+## 设置 eureka 的注册 url
+EUREKA_URL_LIST=${EUREKA_URL_LIST%?}
+echo "EUREKA_URL_LIST is $EUREKA_URL_LIST"
+export EUREKA_URL_LIST=$EUREKA_URL_LIST
+export BOOL_FETCH=$BOOL_FETCH
+export BOOL_REGISTER=$BOOL_REGISTER
+export REGISTER_USER=$REGISTER_USER
+export REGISTER_PWD=$REGISTER_PWD
+
+java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar app.jar
+```
+
+- **k8s**
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-svc-internal
+  labels:
+    app: eureka-svc-internal
+  namespace: spiritdev
+spec:
+  clusterIP: None
+  ports:
+  - port: 8761
+    name: server
+  selector:
+    app: eureka
+      
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: eureka-pdb
+  namespace: spiritdev
+spec:
+  selector:
+    matchLabels:
+      app: eureka
+  minAvailable: 1
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  name: eureka
+  namespace: spiritdev
+spec: 
+  selector: 
+    matchLabels:
+      app: eureka
+  serviceName: eureka-svc-internal
+  replicas: "3"
+  template:
+    metadata:
+      labels:
+        app: eureka
+    spec:
+      terminationGracePeriodSeconds: 10
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              podAffinityTerm: 
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - eureka
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: eureka-cluster
+          image: harbor.xiaohehe.com/spiritdev/eureka-cluster:v1
+          imagePullPolicy: IfNotPresent
+          imagePullSecrets:
+            - name: spiritdev-pushsecret-harbor-xiaohehe-com    ## 设置推送权限（可选）或者 oc secrets link default spiritdev-pushsecret-harbor-xiaohehe-com --for=pull
+          ports: 
+            - containerPort: 8761
+              name: server
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          env: 
+            - name: MY_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: MY_INNER_SERVICE
+              value: eureka-svc-internal
+            - name: EUREKA_APPLICATION_NAME
+              value: eureka
+            - name: EUREKA_REPLICAS
+              value: "3"
+            - name: EUREKA_USER
+              value: dante
+            - name: EUREKA_PWD
+              value: "123456"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8761
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8761
+            initialDelaySeconds: 10
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: eureka-external-svc
+  name: eureka-external-svc
+spec:
+  ports:
+    - name: http-8761
+      port: 8761
+      protocol: TCP
+      targetPort: 8761
+  selector:
+    app: eureka
+  type: ClusterIP  
+```
+
+**参考**
+
+- https://blog.csdn.net/gujian2517/article/details/82491101
+
+#### 3. Redis
 
 **参考**
 
 - https://www.jianshu.com/p/65c4baadf5d9
+
+### 五. 探针
+
+Kubernetes提供了两种探针（Probe，支持exec、tcp和httpGet方式）来探测容器的状态。
+
+#### 1. liveness
+
+用来确定是否重启容器，当程序处于运行状态但无法执行进一步操作时，需要有一个状态去通知 k8s 重启应用。
+
+```yaml
+spec:
+  containers:
+  - name: liveness
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+        httpHeaders:
+          - name: X-Custom-Header
+            value: x-dante
+      initialDelaySeconds: 3
+      periodSeconds: 3
+```
+
+#### 2. readiness
+
+用来确定 Pod 是否已经就绪，可以接受流量。只有当Pod中的容器都处于就绪状态时kubelet才会认定该Pod处于就绪状态。只有就绪状态的 Pod 才会做为 Service 后端负载的一部分。
+
+```yaml
+readinessProbe:
+  exec:
+    command:
+    - cat
+    - /tmp/healthy
+  initialDelaySeconds: 5
+  periodSeconds: 5
+```
+
+| 配置项              |                                                              |
+| ------------------- | ------------------------------------------------------------ |
+| initialDelaySeconds | 容器启动后第一次执行探测是需要等待多少秒（应用启动时间）     |
+| periodSeconds       | 执行探测的频率。默认是10秒，最小1秒。                        |
+| timeoutSeconds      | 探测超时时间。默认1秒，最小1秒。                             |
+| successThreshold    | 探测失败后，最少连续探测成功多少次才被认定为成功。默认是1。对于liveness必须是1。最小值是1。 |
+| failureThreshold    | 探测成功后，最少连续探测失败多少次才被认定为失败。默认是3。最小值是1。 |
+| **针对 httpGet**    |                                                              |
+| host                | 连接的主机名。默认是 pod 的 IP。                             |
+| scheme              | 连接的schema，默认HTTP。                                     |
+| path                | 访问的 HTTP server的path。                                   |
+| port                | 访问的容器的端口名字或者端口号。端口号必须介于1和65525之间。 |
+| httpHeaders         | 自定义请求的header。HTTP运行重复的header。                   |
 

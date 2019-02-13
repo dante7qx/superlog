@@ -24,11 +24,11 @@
 
 应用通信，见下图
 
-![网格-1](/Users/dante/Documents/Technique/且行且记/云原生/网格-1.png)
+![网格-1](./网格-1.png)
 
 ​	上图中的蓝色方框就是 SideCar，ServiceMesh中数量众多的代理，需要进行集中的控制，因此ServiceMesh之上还需要控制面板组件。
 
-![control-plane](/Users/dante/Documents/Technique/且行且记/云原生/control-plane.png)
+![control-plane](./control-plane.png)
 
 ##### 2.2 实现框架
 
@@ -42,7 +42,7 @@
 
 ​	Istio 是 Service Mesh 的一套完整的解决方案，通过为整个服务网格提供行为洞察和操作控制来满足微服务应用程序的多样化需求。本文的操作均基于 k8s 环境。
 
-![istio架构](/Users/dante/Documents/Technique/且行且记/云原生/istio架构.png)
+![istio架构](./istio架构.png)
 
 #### 2. 原理
 
@@ -70,13 +70,13 @@
    - 向上暴露 Envoy API，管理并且供各个具体的SideCar实现来交互。
    - 具体功能：**• 服务发现 • 负载均衡 • 请求路由 • 故障处理 • 故障注入 • 规则配置** 。  
 
-![Pilot](/Users/dante/Documents/Technique/且行且记/云原生/Pilot.png)
+![Pilot](./Pilot.png)
 
 ###### Mixer
 
 ​	应用微服务和基础设施的中间层。主要作用是将策略决策（白名单、监控、日志、计费、限流、配额等）从应用层中移出，不在和特定的后端集成在一起，而是和 Mixer 进行简单的集成，Mixer 负责和后端进行连接。
 
-![Mixer](/Users/dante/Documents/Technique/且行且记/云原生/Mixer.png)
+![Mixer](./Mixer.png)
 
 **实现原理**：
 
@@ -98,7 +98,7 @@
 
       **Request Instance** 和 **Handler** 的选择规则。
 
-	3. Mixer 通过**适配器API**调用后端基础设施。![Mixer流程图](/Users/dante/Documents/Technique/且行且记/云原生/Mixer流程图.png)
+	3. Mixer 通过**适配器API**调用后端基础设施。![Mixer流程图](./Mixer流程图.png)
 
 ###### Istio-Auth
 
