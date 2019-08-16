@@ -42,7 +42,7 @@ Predicate<Apple> = (p1, p2) -> p2.getWeight().compareTo(p1.getWeight());
 
   ```java
   static String modify(Integer i, Function<Integer, String> func) {
-    return func.apply(i);;
+    return func.apply(i);
   }
 
   System.out.println(modify(10, i -> "你好，" + i*i));

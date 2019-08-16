@@ -11,8 +11,10 @@
 1. 下载nexus([http://www.sonatype.com/download-oss-sonatype](http://www.sonatype.com/download-oss-sonatype)) 最新版本nexus-3.3.1-01-mac.tgz
 
 ```shell
-## 使用Docker
+## 使用Docker, 参考 https://hub.docker.com/r/sonatype/nexus
 docker run -d -p 8081:8081 --name dante-nexus -v /Users/dante/Documents/Technique/Docker/volume/nexus:/sonatype-work sonatype/nexus
+
+## 访问 http://localhost:8081/nexus   默认：admin/admin123
 ```
 
 2. 解压到 /Users/dante/Documents/Technique/Maven/Nexus/nexus-3.3.1-01-mac
@@ -109,7 +111,7 @@ nexus-features=nexus-pro-feature
 
    ![Nexus Repo](./Nexus Repo.png)
 
-   ​
+   
 
 ### 四. Maven集成
 
@@ -128,7 +130,9 @@ nexus-features=nexus-pro-feature
 
 2. 部署 Jar 到私服
 
-        一些公共模块或者说第三方构件是无法从Maven中央库下载的。我们需要将这些构件部署到私服上，供其他开发人员下载。用户除了通过界面手动上传构件，也可以配置Maven自动部署构件至Nexus的宿主仓库。
+   ```markdown
+   一些公共模块或者说第三方构件是无法从Maven中央库下载的。我们需要将这些构件部署到私服上，供其他开发人员下载。用户除了通过界面手动上传构件，也可以配置Maven自动部署构件至Nexus的宿主仓库。
+   ```
 
 代理中央仓库
 
@@ -198,7 +202,97 @@ mvn deploy:deploy-file -DgroupId=com.hnair.consumer -DartifactId=crs-security-ut
 注意事项:
 -DrepositoryId=nexus-releases 对应的就是Maven中settings.xml的认证配的名字
 ```
-### 五. 常见问题
+### 五. Nexus3
+
+#### 1. Docker仓库
+
+- 使用 Docker 的方式启动 Nexus3
+
+```bash
+## 8083 - web
+## 8084 - docker hosted （托管仓库 ，私有仓库，可以push和pull）
+## 8085 - docker group（将多个proxy和hosted仓库添加到一个组，只访问一个组地址即可，只能pull）
+## 8086 - docker proxy（代理和缓存远程仓库 ，只能pull）
+docker run -d -p 8083:8081 \
+              -p 8084:8084  \
+              -p 8085:8085  \
+              -p 8086:8086  \
+              --name dante-nexus3 \
+              -v /Users/dante/Documents/Technique/Docker/volume/nexus3:/nexus-data \
+              sonatype/nexus3:3.17.0 
+```
+
+- 登录 Nexus3，http://localhost:8083
+- 创建Blob Stores，用来存储镜像
+
+![1.blob store](./images/docker hub/1.blob store.png)
+
+![2.blob store](./images/docker hub/2.blob store.png)
+
+- 创建 docker repositories
+
+![1.blob store](./images/docker hub/3.docker repo.png)
+
+![1.blob store](./images/docker hub/4.docker repo.png)
+
+- **docker（proxy）**
+
+![5.docker proxy](./images/docker hub/5.docker proxy.png)
+
+![6.docker proxy](./images/docker hub/6.docker proxy.png)
+
+**其中需要注意的是，在添加Proxy的Remote Storage的时候，需要选中`Use certificates Stored in the Nexus truststore to connect to external systems`， 然后点击`View Certificate`, 点击 `Add certificate to truststore**`
+
+![7.docker proxy](./images/docker hub/7.docker proxy.png)
+
+- **docker（hosted）**
+
+![8.docker hosted](./images/docker hub/8.docker hosted.png)
+
+- **docker（group）**
+
+![10.docker group](./images/docker hub/9.docker group.png)
+
+![9.docker group](./images/docker hub/10.docker group.png)
+
+- 推送镜像
+
+  ![11. push image](./images/docker hub/11. push image.png)
+
+```bash
+$ docker tag busybox:1.30.1 172.20.10.5:8084/busybox:1.30.1
+## 登录私用仓库
+$ docker login 172.20.10.5:8084 -u admin -p *****	
+$ docker push 172.20.10.5:8084/busybox:1.30.1
+```
+
+- 拉取镜像
+
+```bash
+## 登录 docker group
+$ docker login 172.20.10.5:8085 -u admin -p *****	
+## 先从 hosted 上找，没有就通过 proxy 去官方 docker hub 上下载
+$ docker pull 172.20.10.5:8085/nginx
+Using default tag: latest
+latest: Pulling from nginx
+0a4690c5d889: Pull complete 
+9719afee3eb7: Pull complete 
+44446b456159: Pull complete 
+```
+
+- 高级用法
+
+
+
+参考：
+
+- https://segmentfault.com/a/1190000015629878
+- https://zhang.ge/5139.html
+- https://www.hifreud.com/2018/06/05/02-nexus-docker-repository
+- https://help.sonatype.com/repomanager3/formats/docker-registry
+- https://juejin.im/post/5c70a8156fb9a049f746d0fc
+
+### 八. 常见问题
 
 #### 1. was cached in the local repository
 

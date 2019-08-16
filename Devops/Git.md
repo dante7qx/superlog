@@ -232,7 +232,7 @@ $ git commit --amend
 ## 五、分支
 
 	Git 的分支，其实本质上仅仅是指向提交对象的可变指针。 Git 的默认分支名字是 `master`。 在多次提交操作之后，你其实已经有一个指向最后那个提交对象的 `master` 分支。 它会在每次的提交操作中自动向前移动。
-
+	
 	Git 的分支实质上仅是包含所指对象校验和（长度为 40 的 SHA-1 值字符串）的文件，所以它的创建和销毁都异常高效。 创建一个新分支就相当于往一个文件中写入 41 个字节（40 个字符和 1 个换行符）
 
 `master`分支是一条线，Git用`master`指向最新的提交，再用`HEAD`指向`master`，就能确定当前分支，以及当前分支的提交点
@@ -334,7 +334,7 @@ git branch -d feature-apt
 1、抓取远程仓库数据、合并本地
 
 	`git fetch`  从服务器上抓取本地没有的数据时，它并不会修改工作目录中的内容。
-
+	
 	`git merge`  合并远程分支的内容
 
 2、使用`git pull` 
@@ -421,11 +421,11 @@ git rebase 和 git merge 都是用来合并分支。
 **解决冲突**
 
 	在rebase的过程中，也许会出现冲突(conflict). 在这种情况，Git会停止rebase并会让你去解决 冲突；在解决完冲突后，用"git-add"命令去更新这些内容的索引(index), 然后，你无需执行 git-commit,只要执行:
-
+	
 	`$ git rebase --continue`
-
+	
 	这样git会继续应用(apply)余下的补丁。在任何时候，你可以用--abort参数来终止rebase的行动，并且"mywork" 分支会回到rebase开始前的状态。
-
+	
 	`$ git rebase --abort`
 
 ## 七、错误积累
@@ -442,10 +442,10 @@ merge失败，有conflicts没解决，可以：
 
 
 
-## 标签
+## 八. 标签
 
 	发布一个版本时，先在版本库中打一个标签，将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。
-
+	
 	Git的标签虽然是版本库的快照，但其实它就是指向某个commit的指针。（跟分支很像对不对？但是分支可以移动，标签不能移动）
 
 ```shell
@@ -469,3 +469,4 @@ git push origin :refs/tags/[tagName]
 - http://gitbook.liuhui998.com/
 - http://blog.csdn.net/wh_19910525/article/details/7554489
 - http://www.01happy.com/git-resolve-conflicts/
+- https://www.cnblogs.com/williamjie/p/9145570.html （Github多帐号）

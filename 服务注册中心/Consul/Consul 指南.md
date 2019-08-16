@@ -23,7 +23,7 @@
 
 **术语**
 
-#### 1. agent
+#### 1. Agent
 
 Consul 的核心概念，每一个Consul Node 都需要启动一个 agent（Server 和 Client）。每个 agent 上运行有 DNS、HTTP接口，负责运行检查并保持服务同步。可以使用其他**Proxy（Envoy）**替代。
 

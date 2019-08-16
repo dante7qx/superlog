@@ -118,9 +118,9 @@
       MaxAutoRetriesNextServer: 1 # 切换Server实例的重试次数 (不包括第一次连接请求)
   ```
 
-  	 **Hystrix timeout 时间要大于Ribbon timeout，例如：Ribbon connection timeout 是1秒，并且重试次数为3次，则Hystrix timeout需要设置大于3秒，设置如下**
+   **Hystrix timeout 时间要大于Ribbon timeout，例如：Ribbon connection timeout 是1秒，并且重试次数为3次，则Hystrix timeout需要设置大于3秒，设置如下**
 
-  	**`hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 5`**
+  **`hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 5`**
 
   - 自定义@RibbonClient，不应该被启动类@ComponentScan，否则所有Ribbon都会被应用。需要被@ComponentScan排除
 

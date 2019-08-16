@@ -150,3 +150,53 @@ $? =  1
  [[ "test.php" == *.php ]] && echo true || echo false			=> true
 ```
 
+#### 4. 引号
+
+- 单引号
+
+  强引用，它会忽略所有被引起来的字符的特殊处理，被引用起来的字符会被原封不动的使用，唯一需要注意的点是不允许引用自身。
+
+- 双引号
+
+  弱引用，它会对一些被引起来的字符进行特殊处理。
+
+- 反引号
+
+  ``， 是命令替换，命令替换是指Shell可以先执行反引号中的命令，将输出结果暂时保存，在适当的地方输出。
+
+```bash
+x="hello"
+y=25
+
+echo '$x'
+echo '\$x'
+echo '"$x"'
+echo "$x"
+echo "\$x"
+echo '{"name":"$x"}'
+echo '{"name":"'$x'"}'
+echo "{\"name\":\"$y\"}"
+echo "{\"name\":"$y"}"
+
+list=`ls -la`
+echo '$list'
+echo "$list"
+
+## 输出
+$x
+\$x
+"$x"
+hello
+$x
+{"name":"$x"}
+{"name":"hello"}
+{"name":"25"}
+{"name":25}
+
+$list
+total 1343160
+drwxr-xr-x@   3 dante  staff         96 11  5  2016 $RECYCLE.BIN
+drwx------+  20 dante  staff        640  5 22 10:59 .
+drwxr-xr-x+ 122 dante  staff       3904  5 20 11:46 ..
+```
+

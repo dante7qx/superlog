@@ -156,11 +156,9 @@ esac
 exit 0
 ```
 
-
-
 #### 3. 热备高可用
 
-	利用 Keepalived 实现 HAProxy 的热备。即两台主机上的两个HAProxy实例同时在线，其中权重较高的实例为MASTER，MASTER出现问题时，另一台实例自动接管所有流量。
+​	利用 Keepalived 实现 HAProxy 的热备。即两台主机上的两个HAProxy实例同时在线，其中权重较高的实例为MASTER，MASTER出现问题时，另一台实例自动接管所有流量。
 
  	具体原理，在两台 HAProxy 的主机上分别运行着一个 Keepalived 实例，两个 Keepalived 同时争抢同一个 VIP，两个 HAProxy 也尝试去绑定这同一个 VIP上的端口。Keepalived内部维护一个权重值，权重值最高的Keepalived实例能够抢到 VIP，成为 MASTER。同时Keepalived会定期check本主机上的HAProxy状态，状态OK时权重值增加。
 
@@ -219,9 +217,8 @@ vrrp_instance VI_1 {
 
 - 命令行方式（优先级最高）
 
-- 全局配置
+- 全局配置（global，设定全局配置参数）
 
-        global，设定全局配置参数。
 
 ```nginx
 global # 全局属性

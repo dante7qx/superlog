@@ -349,7 +349,7 @@ spec:
 
   	Route 的负载采用 session affinity，router 先选择一个 endpoint 处理 Client 的请求，并且会创建一个 cookie 在响应中传回。Client 随后的请求都会携带此 cookie，router 根据cookie 可以将 Client 的请求交给之前的 endpoint（同一个 pod） 进行处理。
 
-  	可修改 cookie 的名称，在 Client 端对 cookie 进行删除，可实现 round-ribbon。
+    	可修改 cookie 的名称，在 Client 端对 cookie 进行删除，可实现 round-ribbon。
 
   ```yaml
   ## CLI 操作
@@ -516,7 +516,7 @@ oc create clusterrolebinding cluster-admin --clusterrole=cluster-admin --user=da
 
 **Service Account**
 
-	Service Account是用来控制非自然用户在访问Openshift平台进行服务部署的时候所具有的能力范围的，它是承载SCC和cluster role的实体。
+Service Account是用来控制非自然用户在访问Openshift平台进行服务部署的时候所具有的能力范围的，它是承载SCC和cluster role的实体。
 
 ```shell
 ## 命名规则

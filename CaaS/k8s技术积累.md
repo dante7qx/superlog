@@ -2,7 +2,13 @@
 
 ### 一. Secrets
 
-​	k8s Secret 用来存储少量敏感的数据，例如数据库、Gitlab的用户、密码。这样可以不在 Image 中去保留敏感信息，并且可以在多个 Pod 中共享这些 Secret。因为 k8s 使用 JWT 的方式进行加密，所以需要加密的数据必须先进行 base64 编码。参考 https://kubernetes.io/docs/concepts/configuration/secret
+
+
+​	k8s Secret 用来存储少量敏感的数据，例如数据库、Gitlab的用户、密码。这样可以不在 Image 中去保留敏感信息，并且可以在多个 Pod 中共享这些 Secret。因为 k8s 使用 JWT 的方式进行加密，所以需要加密的数据必须先进行 base64 编码。参考 https://kubernetes.io/docs/concepts/configuration/secret。
+
+​        Secret 有三种类型。
+
+#### 1. Opaque（不透明）
 
 ```shell
 ## 编码
@@ -64,6 +70,26 @@ spec:
             name: gitlabsecret
             key: password
 ```
+
+#### 2. Service Account
+
+用来访问Kubernetes API，由Kubernetes自动创建，并且会自动挂载到Pod的 **/run/secrets/kubernetes.io/serviceaccount** 目录中；
+
+```bash
+$ kubectl run nginx --image nginx
+deployment "nginx" created
+$ kubectl get pods
+NAME                     READY     STATUS    RESTARTS   AGE
+nginx-3137573019-md1u2   1/1       Running   0          13s
+$ kubectl exec nginx-3137573019-md1u2 ls /run/secrets/kubernetes.io/serviceaccount
+ca.crt
+namespace
+token
+```
+
+#### 3. dockerconfigjson
+
+**kubernetes.io/dockerconfigjson**：用来存储私有docker registry的认证信息。
 
 ### 二. PV / PVC
 
@@ -939,8 +965,6 @@ spec:
         - name: eureka-cluster
           image: harbor.xiaohehe.com/spiritdev/eureka-cluster:v1
           imagePullPolicy: IfNotPresent
-          imagePullSecrets:
-            - name: spiritdev-pushsecret-harbor-xiaohehe-com    ## 设置推送权限（可选）或者 oc secrets link default spiritdev-pushsecret-harbor-xiaohehe-com --for=pull
           ports: 
             - containerPort: 8761
               name: server
@@ -991,6 +1015,8 @@ spec:
               port: 8761
             initialDelaySeconds: 10
             periodSeconds: 5
+      imagePullSecrets:
+        - name: spiritdev-pushsecret-harbor-xiaohehe-com    ## 设置推送权限（可选）或者 oc secrets link default spiritdev-pushsecret-harbor-xiaohehe-com --for=pull
 ---
 apiVersion: v1
 kind: Service
@@ -1069,4 +1095,121 @@ readinessProbe:
 | path                | 访问的 HTTP server的path。                                   |
 | port                | 访问的容器的端口名字或者端口号。端口号必须介于1和65525之间。 |
 | httpHeaders         | 自定义请求的header。HTTP运行重复的header。                   |
+
+### 六. Ingress
+
+k8s 默认通过 service 暴露服务，其中 NodePort 类型可以将http 服务暴露在宿主机的端口上，以便外部可以访问。这种模式虽然简单，但是有几个缺点：
+
+- 一个服务对应的app就要占用一个宿主机的端口，并且端口缺乏管理。
+- L4 转发，无法根据 http header 和 path 进行路由转发。
+
+通过 Ingress（https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/），ingress -> service -> label selector -> pod，可以增加 L7 的能力。Ingress 由两部分组成
+
+- Ingress Controller
+
+  是流量的入口，是一个实体软件， 一般是Nginx 和 Haproxy 。用来实时的去实现规则。将所有的  ingress  controller 安装在一个 namespace 中，方便管理，推荐使用 **DaemonSet** 方式部署。
+
+- Ingress
+
+  描述具体的路由规则。
+
+![ingress](./ingress.png)
+
+#### 1. nginx ingress
+
+- 安装 ingress  controller
+
+
+```shell
+cd /Users/dante/Documents/Technique/k8s/project/dante/ingress/nginx
+## 1. 为 ingress controller 创建 namespace 和 service account
+kubectl apply -f ns-and-sa.yaml
+kubectl apply -f rbac.yaml
+## 2. 创建一个 secret（tls 证书和私钥），为 nginx default server
+kubectl apply -f default-server-secret.yaml
+## 3. 加载ingress-nginx/nginx-configuration这个configmap配置文件，从而允许我们修改nginx的http段的各种配置项覆盖nginx的默认值
+kubectl apply -f nginx-config.yaml
+## 4. 创建 controller（deployment 或 daemonSet（推荐））
+kubectl apply -f deployment-controller.yaml
+kubectl apply -f service.yaml (hostNetwork)
+```
+
+- 为各个应用服务创建 ingress
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ccb-ingress
+  namespace: dante
+  annotations:
+    nginx.org/rewrites: "serviceName=ccb-ui rewrite=/; serviceName=ccb-svc1 rewrite=/; serviceName=ccb-svc2 rewrite=/"
+spec:
+  tls:
+  - hosts:
+    - x.dante.com
+    secretName: nginx-server-secret
+  rules:
+  - host: x.dante.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ccb-ui
+          servicePort: 8080
+      - path: /svc1
+        backend:
+          serviceName: ccb-svc1
+          servicePort: 8080
+      - path: /svc2
+        backend:
+          serviceName: ccb-svc2
+          servicePort: 8080
+```
+
+参考：
+
+- https://github.com/nginxinc/kubernetes-ingress
+- https://www.cnblogs.com/justmine/p/8991379.html
+- https://blog.csdn.net/shida_csdn/article/details/84032019
+- https://blog.hlyue.com/2018/05/12/deploy-nginx-ingress-controller-on-kubernetes
+- https://www.nginx.com/
+
+#### 2. Envoy ingress
+
+
+
+#### 3. kong ingress
+
+
+
+#### 4. Traefik ingress
+
+
+
+参考：
+
+- https://github.com/containous/traefik
+- https://www.jianshu.com/p/1afe374f4333
+- https://docs.traefik.io/configuration/backends/kubernetes **（配置）**
+
+#### 5. HaProxy ingress
+
+
+
+参考：
+
+- https://www.jianshu.com/p/189fab1845c5
+- https://kubernetes.github.io/ingress-nginx/
+
+
+
+### 七. kustomize
+
+
+
+参考：
+
+- https://kustomize.io/
+- https://blog.maoxianplay.com/posts/kustomize-1/
 
