@@ -41,7 +41,7 @@
   - [Reactor](Java/Reactor 指南.md)
   - [OAuth2](Java/OAuth2 说明.md)
   - [JWT](Java/JWT 说明.md)
-- [分布式事务](Java/分布式事务.md)
+  - [分布式事务](Java/分布式事务.md)
 * SpringBoot
   - [集成Mybatis](SpringBoot/集成Mybatis.md)
   - [Druid多数据源](SpringBoot/Druid多数据源.md)
@@ -72,6 +72,7 @@
   - [K8s-Jenkins](Devops/K8s-Jenkins.md)
   - [Sonarqube](Devops/Sonarqube 说明.md)
   - [Gerrit](Devops/Gerrit 说明.md)
+
 - [Git](Devops/Git.md)
 * CaaS
 
