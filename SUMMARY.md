@@ -6,24 +6,20 @@
   * [3.Docker微服务](Docker/3.Docker微服务.md)
   * [4.Docker网络模式](Docker/4.Docker网络模式.md)
   * [5.Docker-Swarm](Docker/5.Docker-Swarm.md)
-
 * 消息中间件
 
   - [Kafka](Kafka/Kafka 指南.md)
   - [RabbitMQ](RabbitMQ/RabbitMQ说明.md)
-
 * 服务注册中心
 
   - [Consul](服务注册中心/Consul/Consul 指南.md)
-
+  - [Etcd](服务注册中心/etcd/ETCD 指南.md)
 * 软件负载器
   - [Nginx](LoadBalance/Nginx.md)
   - [HAProxy](LoadBalance/HAProxy.md)
-
 * 网络
 
   - [1.网络基础](网络/网络基础.md)
-
 * 前端之巅
 
   - [Babel指南](前端/Babel指南.md)
@@ -33,7 +29,6 @@
   - [Sass指南](前端/Sass指南.md)
   - [Vue指南](前端/Vue指南.md)
   - [Webpack指南](前端/Webpack指南.md)
-
 * Java
 
   - [泛型](Java/泛型.md)
@@ -46,7 +41,7 @@
   - [Reactor](Java/Reactor 指南.md)
   - [OAuth2](Java/OAuth2 说明.md)
   - [JWT](Java/JWT 说明.md)
-
+- [分布式事务](Java/分布式事务.md)
 * SpringBoot
   - [集成Mybatis](SpringBoot/集成Mybatis.md)
   - [Druid多数据源](SpringBoot/Druid多数据源.md)
@@ -57,7 +52,6 @@
   - [WebSocket](SpringBoot/SpringWebSocket.md)
   - [SpringSecurity](SpringBoot/SpringSecurity.md)
   - [SpringBatch](SpringBoot/SpringBatch.md)
-
 * SpringCloud
 
   - [Eureka](SpringCloud/Eureka.md)
@@ -72,25 +66,22 @@
   - [Spring Boot Admin](SpringCloud/Spring Boot Admin.md)
   - [Edgware 版本](SpringCloud/版本特性/Edgware 版本.md)
   - [Finchley 版本](SpringCloud/版本特性/Finchley 版本.md)
-
 * Devops
   - [Nexus](Devops/Nexus 说明.md)
   - [Jenkins](Devops/Jenkins说明.md)
+  - [K8s-Jenkins](Devops/K8s-Jenkins.md)
   - [Sonarqube](Devops/Sonarqube 说明.md)
   - [Gerrit](Devops/Gerrit 说明.md)
-  - [Git](Devops/Git.md)
-
+- [Git](Devops/Git.md)
 * CaaS
 
   - [K8s技术积累](CaaS/k8s技术积累.md)
   - [OpenShift](CaaS/OpenShift.md)
   - [Helm](CaaS/Helm 指南.md)
   - [云原生](云原生/云原生.md)
-
 * Kong
 
   - [Kong](Kong/Kong.md)
-
 * Linux
   - [Tcpdump](Linux/Tcpdump 命令.md)
   - [Shell](Linux/Shell 命令.md)
