@@ -35,7 +35,6 @@
   - [Java8 特性](Java/Java 特性.md)
   - [JDK 并发](JDK 并发框架/JDK 并发框架.md)
   - [公钥与私钥](Java/公钥与私钥.md)
-  - [Git](Git.md)
   - [lombok详解](lombok详解.md)
   - [Maven](Maven 使用说明.md)
   - [Reactor](Java/Reactor 指南.md)
@@ -72,8 +71,8 @@
   - [K8s-Jenkins](Devops/K8s-Jenkins.md)
   - [Sonarqube](Devops/Sonarqube 说明.md)
   - [Gerrit](Devops/Gerrit 说明.md)
+  - [Git](Git.md)
 
-- [Git](Devops/Git.md)
 * CaaS
 
   - [K8s技术积累](CaaS/k8s技术积累.md)
