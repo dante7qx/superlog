@@ -344,6 +344,28 @@ spec:
 
 ![pv~pvc](./pv~pvc.png)
 
+#### 5. Local PV
+
+Local PV 在 k8s 1.14版本已经提升为GA。Local PV 代表一个可以直接连接到的计算节点本地盘 ，性能比远程存储高。Local PV 与 HostPath 的区别：
+
+- HostPath
+
+  HostPath Volume 将文件或目录从计算节点的文件系统挂载到Pod中。k8s 调度时，可能会将引用 HostPath Volume 的pod移动到其他节点，从而导致数据丢失。
+
+- Local PV
+
+  k8s 调度时，可确保始终将使用Local PV 的Pod 调度到同一个计算节点。并且 Local PV 只能通过 PVC 引用，阻止Pod能够访问主机上的任何路径，更加安全。**（Local PV 不支持动态的 Provision）**
+
+- 使用
+
+  参考： https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner#user-guide
+
+```yaml
+
+```
+
+
+
 **参考：**
 
 - http://blog.51cto.com/forall/2135152
@@ -1206,10 +1228,243 @@ spec:
 
 ### 七. kustomize
 
+Kustomize 允许用户以一个应用描述文件 （[YAML](https://www.colabug.com/tag/yaml/) 文件）为基础（Base YAML），然后通过 Overlay 的方式生成最终部署应用所需的描述文件，而不是像 Helm 那样只提供应用描述文件模板，然后通过字符替换（Templating）的方式来进行定制化。
 
+#### 1. 安装
+
+- 下载最新包 https://github.com/kubernetes-sigs/kustomize/releases
+
+- 解压，把 kustomize 放到 /usr/local/bin/ 下，输入 kustomize version 进行测试。
+
+- kubectl v1.14 版本后已经将 kustomize 作为子命令，通过 kubectl apply -k 来使用，集成的 kustomize 的版本如下。（按照 v2.0.3 来编写 kustomize yaml）
+
+  | kubectl version | kustomize version                                            |
+  | --------------- | ------------------------------------------------------------ |
+  | v1.15.x         | [v2.0.3](https://github.com/kubernetes-sigs/kustomize/tree/v2.0.3) |
+  | v1.14.x         | [v2.0.3](https://github.com/kubernetes-sigs/kustomize/tree/v2.0.3) |
+
+#### 2. 使用
+
+​		主要参考  
 
 参考：
 
-- https://kustomize.io/
-- https://blog.maoxianplay.com/posts/kustomize-1/
+- https://kustomize.io
+- https://aisensiy.github.io/2018/11/27/helm-and-kustomize
+- https://blog.maoxianplay.com/posts/kustomize-1
+- https://www.colabug.com/5993752.html
+
+
+
+### 八. Pod自动扩缩容
+
+kubernetes 推荐使用 deployment 来管理无状态的应用，通过 --replicas 或者产品页面来扩缩容。这一过程都是需要手工的，纯手工去做是不现实的。
+
+k8s 通过 HPA 的设定，实现容器的弹性伸缩，当前的弹性伸缩的指标包括：**CPU，内存，并发数，包传输大小**。HPA控制器默认每隔30秒就会运行一次，一旦创建的HPA，我们就可以通过命令查看获取到的当前指标信息。资源指标基于第三方指标应用程序（如Metrics Server、Prometheus、Datadog等）提供的自定义指标，自动调整副本控制器、部署或者副本集合的pods数量（定义最小和最大pods数）。
+
+![HPA](./HPA.png)
+
+HPA 是k8s 中弹性伸缩API组的一个API资源，当前稳定版本是 autoscaling/v1，它只提供了对CPU自动缩放的支持。如果想额外获得对内存和自定义指标的支持，可以使用Beta版本autoscaling/v2beta1。通过 kubectl 创建的 HPA只支持 CPU。
+
+- 资源指标
+
+  **Metrics Server**
+
+  1. 下载 metrics-server
+
+  ```shell
+  git clone https://github.com/kubernetes-incubator/metrics-server.git
+  ```
+
+  2. 修改 metrics-server-deployment.yaml
+
+  ```yaml
+  ## 添加命令和相关参数
+  ## 1. 从 kubelet 采集数据的周期 30s
+  ## 2. 优先使用 InternalIP 来访问 kubelet，这样可以避免节点名称没有 DNS 解析记录时，通过节点名称调用节点 kubelet API 失败的情况（未配置时默认的情况）
+  ## 3. 不验证客户端证书
+  ...
+  containers:
+  - name: metrics-server
+    image: k8s.gcr.io/metrics-server-amd64:v0.3.3
+    command: 
+      - /metrics-server 
+      - --metric-resolution=30s 
+      - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP 
+      - --kubelet-insecure-tls
+    imagePullPolicy: Always
+  ...
+  ```
+
+  3. 部署 metrics-server
+
+  ```bash
+  ## 安装
+  kubectl apply -f metrics-server/deply/1.8+/
+  ## 测试
+  kubectl -n kube-system get po -l k8s-app=metrics-server
+  kubectl -n kube-system get svc
+  ```
+
+- **HPA**
+
+  1. 创建 Deployment
+
+  ```yaml
+  ---
+  apiVersion: apps/v1beta1
+  kind: Deployment
+  metadata:  
+    name: hpa-nginx-deploy  
+    namespace: dante
+    labels:    
+      app: nginx-demo
+  spec: 
+    template:   
+      metadata:      
+        labels:        
+          app: nginx    
+      spec:      
+        containers:      
+        - name: nginx        
+          image: nginx:1.17        
+          resources: 
+            requests: 
+              cpu: 100m 
+              memory: 80Mi
+            limits: 
+              cpu: 100m 
+              memory: 150Mi
+          ports:        
+          - containerPort: 80
+   
+  ## kubectl apply -f nginx-deployment.yaml
+  ```
+
+  2. 创建 HPA
+
+  - autoscaling/v1
+
+  ```shell
+  kubectl autoscale deployment hpa-nginx-deploy --cpu-percent=5 --min=1 --max=5 -n dante
+  ```
+
+  - autoscaling/v2beta1
+
+  ```yaml
+  ## vi auto-hpa-v2.yaml
+  apiVersion: autoscaling/v2beta1
+  kind: HorizontalPodAutoscaler
+  metadata:
+    name: auto-hpa-v2
+    namespace: dante
+  spec:
+    scaleTargetRef:
+      apiVersion: extensions/v1beta1
+      kind: Deployment
+      name: hpa-nginx-deploy
+    minReplicas: 1
+    maxReplicas: 5
+    metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 50
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageValue: 100Mi
+  ```
+
+  - 对 Deployment 加压
+
+  ```bash
+  kubectl run -i --tty load-generator --image=busybox --restart=Never /bin/sh -n dante 
+  while true; do wget -q -O- http://<pod-ip>; done;
+  ```
+
+  - 查看效果
+
+  ```shell
+  kubectl get hpa -n dante
+  kubectl get po -n dante
+  ```
+
+参考：
+
+- https://blog.51cto.com/12462495/2162304
+- https://cloud.tencent.com/developer/article/1492864
+- https://github.com/kubernetes-incubator/metrics-server
+- https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline
+
+### 九. kubeval
+
+Kubeval用于验证一个或多个Kubernetes配置文件，并且通常在本地用作开发工作流程以及CI管道的一部分。
+
+1. 安装
+
+- mac
+
+```bash
+## 使用 Homebrew
+brew tap instrumenta/instrumenta
+brew install kubeval
+
+## 下载二进制包 https://github.com/instrumenta/kubeval/releases
+tar xf kubeval-darwin-amd64.tar.gz
+sudo cp kubeval /usr/local/bin
+```
+
+- linux
+
+```bash
+wget https://github.com/instrumenta/kubeval/releases/download/0.9.2/kubeval-linux-amd64.tar.gz
+tar xf kubeval-linux-amd64.tar.gz
+sudo cp kubeval /usr/local/bin
+```
+
+2. 使用
+
+```bash
+kubeval *.yaml
+```
+
+参考：
+
+- [https://kubeval.instrumenta.dev](https://kubeval.instrumenta.dev/)
+
+### 十. ImagePullSecrets
+
+如果公司的docker仓库(harbor)，需要用户认证之后，才能拉取镜像。那如何在k8s里生成这个secret呢？在k8s的yaml文件里如何实现呢？
+
+- 生成docker-registry的secret
+
+```shell
+kubectl create secret docker-registry harborsecret --docker-server=harbor.demo.com.cn --docker-username='docker-admin' --docker-password='==pwd==' --docker-email='admin@demo.com'
+```
+
+- 查看secret
+
+```bash
+kubectl get secrets harborsecret --output="jsonpath={.data.\.dockerconfigjson}" | base64 -d
+```
+
+- 在demployment yaml文件中的使用
+
+```yaml
+... 
+spec:
+  imagePullSecrets:
+  - name:harborsecret
+  containers:
+  - name: eureka
+  image: harbor.demo.com.cn/eurekaserver:v1
+...
+```
+
+- 删除此secret
+
+```bash
+kubectl delete secrets harborsecret
+```
 

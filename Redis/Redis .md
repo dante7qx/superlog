@@ -327,7 +327,7 @@ rename-command CONFIG ""
    ```powershell
    # bind 127.0.0.1
    protected-mode no
-   port 6380
+   port 6381
    daemonize yes
    pidfile /var/run/redis_6381.pid
    logfile "/opt/redis-conf/redis_6381.log"
@@ -442,7 +442,7 @@ rename-command CONFIG ""
        在sentinel之间建立连接之前,sentinel将会尽力和配置文件中指定的master建立连接.sentinel与master的连接中的通信主要是基于pub/sub来发布和接收信息,发布的信息内容包括当前sentinel实例的侦听端口:
    ```
 
-   ​
+   
 
    - 最后，可通过命令 **info replication** 查看Node信息。
 
@@ -793,7 +793,7 @@ cluster-require-full-coverage yes
   echo "clean       -- Remove all instances data, logs, configs."
   ```
 
-  ​
+  
 
 ### 六. 数据持久化
 

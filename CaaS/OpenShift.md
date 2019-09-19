@@ -732,6 +732,18 @@ spec:
                   values:
                   - redis
               topologyKey: kubernetes.io/hostname
+              
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                  - key: security
+                    operator: In
+                    values:
+                    - S2
+                topologyKey: kubernetes.io/hostname
   ```
 
 - **Node Selector**（**不建议）**
