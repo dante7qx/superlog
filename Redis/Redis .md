@@ -793,7 +793,9 @@ cluster-require-full-coverage yes
   echo "clean       -- Remove all instances data, logs, configs."
   ```
 
-  
+- 设置集群密码
+
+  http://www.52yunwei.net/1032.html
 
 ### 六. 数据持久化
 

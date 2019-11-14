@@ -26,7 +26,7 @@
 
 - **Patition**：Topic物理上的分组，一个Topic可以分为多个Patition，每个Patition都是有序且顺序不可变的记录集，并且不断地追加到结构化的commit log文件中。Kafka 集群保留所有发布的记录—无论他们是否已被消费—并通过一个可配置的参数——保留期限来控制。通常partition的数量通常是Broker Server数量的整数倍。
 
-  - leader 和 follower：leader时主patition，producer写消息到kafka时先写到patition leader，再由patition leader push 给其他的 patition follower。partition leader与follower的信息受Zookeeper控制，一旦partition leader所在的broker节点宕机，zookeeper会冲其他的broker的partition follower上选择follower变为parition leader。
+  - leader 和 follower：leader是主patition，producer写消息到kafka时先写到patition leader，再由patition leader push 给其他的 patition follower。partition leader与follower的信息受Zookeeper控制，一旦partition leader所在的broker节点宕机，zookeeper会冲其他的broker的partition follower上选择follower变为parition leader。
   - ISR：in-sync replica，同步状态的副本的集合。在这个集合中的节点都是和leader保持高度一致的，任何一条消息必须被这个集合中的每个节点读取并追加到日志中了，才回通知外部这个消息已经被提交了。因此这个集合中的任何一个节点随时都可以被选为leader.ISR在ZooKeeper中维护。
 
 - **offset**：分区中的每一个记录都会分配一个id号来表示顺序。用来唯一的标识分区中每一条记录。
@@ -180,5 +180,5 @@ Kafka提供了两套consumer api，分为high-level api和sample-api。
   - https://stackoverflow.com/questions/38260091/kafka-0-10-java-client-timeoutexception-batch-containing-1-records-expired
   - http://orchome.com/447
 
-  ​
+  
 

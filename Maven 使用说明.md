@@ -142,6 +142,51 @@
     </build> 
     ```
 
+
+
+15. man -pl -am -amd
+
+- https://www.cnblogs.com/sandyflower/p/11600108.html
+
+```properties
+1. 在dailylog-parent目录运行`mvn clean install -pl org.lxp:dailylog-web -am`，结果
+
+dailylog-common成功安装到本地库
+dailylog-parent成功安装到本地库
+dailylog-web成功安装到本地库
+该命令等价于`mvn clean install -pl ../dailylog-web -am`
+
+2. 在dailylog-parent目录运行`mvn clean install -pl ../dailylog-common -am`，结果
+
+dailylog-common成功安装到本地库
+dailylog-parent成功安装到本地库
+3. 在dailylog-parent目录运行`mvn clean install -pl ../dailylog-common -amd`，结果
+
+dailylog-common成功安装到本地库
+dailylog-web成功安装到本地库
+由于dailylog-parent并不依赖dailylog-common模块，故没有被安装
+
+4. 在dailylog-parent目录运行`mvn clean install -pl ../dailylog-common,../dailylog-parent -amd`，结果
+
+dailylog-common成功安装到本地库
+dailylog-parent成功安装到本地库
+dailylog-web成功安装到本地库
+5. 在dailylog-parent目录运行`mvn clean install -N`，结果
+
+dailylog-parent成功安装到本地库
+-N表示不递归，那么dailylog-parent管理的子模块不会被同时安装
+
+6. 在dailylog-parent目录运行`mvn clean install -pl ../dailylog-parent -N`，结果
+
+dailylog-parent成功安装到本地库
+7. 在dailylog-parent目录运行`mvn clean install -rf ../dailylog-common`，结果
+
+dailylog-common成功安装到本地库
+dailylog-web成功安装到本地库
+```
+
+
+
 #### 常用插件
 
 ##### ***maven-compiler-plugin*** 

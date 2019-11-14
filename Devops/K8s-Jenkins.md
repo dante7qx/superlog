@@ -27,6 +27,26 @@
 
 ![config](./images/config.png)
 
+**配置证书**：（https://blog.csdn.net/diantun00/article/details/81180694）
+
+1. 查看 Kubernetes的配置文件 即 /etc/kubernetes/admin.conf
+
+   文件中有三个值 certificate-authority-data 、client-certificate-data 、 client-key-data 
+
+   解码它们获得证书 ，注意将上面的值替换称自己的一大长传字符串
+
+   ```bash
+   echo certificate-authority-data | base64 -d > ca.crt
+   echo client-certificate-data | base64 -d > client.crt
+   echo client-key-data | base64 -d > client.key
+   ```
+
+2. 根据这三个文件生成一个PKCS12格式的客户端证书文件，注意生成证书的时候，一定要填写密码，后面会用到。
+
+   ```bash
+   openssl pkcs12 -export -out cert.pfx -inkey client.key -in client.crt -certfile ca.crt
+   ```
+
 ### 三. 实际案例
 
 ```yacas

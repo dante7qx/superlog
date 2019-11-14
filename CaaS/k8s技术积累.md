@@ -1063,8 +1063,463 @@ spec:
 
 #### 3. Redis
 
+##### 集群模式
+
+- Redis 集群模式，每个 Master 都有一个或多个 Slave，Master 掉线后，Cluster 会从多个 Slave 中选举一个作为 Master，旧的 Master 重新上线后会变成新 Master 的一个 Slave。
+
+- Redis 的集群要所有的 redis 实例都启动后，才能进行配置，每个实例节点通过启动后自动生成的 ID（nodes.conf 中）来记录其他的节点。因为在 k8s 中，IP 不是固定不变的，而节点ID在整个生命周期中一直保持不变。
+
+  每个节点都要绑定不同的存储数据，也就是说，Pod A第一次读取到的数据,和隔了十分钟之后再次读取到的数据,应该是同一份。
+
+- 用 Statefulset 搭建
+
+  (1) 使用 Configmap 存放 redis 配置
+
+```bash
+### redis.conf
+appendonly yes                      # 开启Redis的AOF持久化
+cluster-enabled yes                 # 打开集群模式
+cluster-config-file /var/lib/redis/nodes.conf  #各节点使用ID进行互知
+cluster-node-timeout 5000           # 节点超时时间
+dir /var/lib/redis                  # AOF持久化文件存在的位置
+port 6379
+```
+
+```bash
+kubectl create configmap redis-conf --from-file redis.conf -n dante
+```
+
+​	(2) 创建PV、PVC（本例使用 Local PV）
+
+```yaml
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv0
+spec:
+  capacity:
+    storage: 300M
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /Users/dante/Documents/Technique/k8s/project/openshift/statefulset/redis/cluster/data/pv0
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv1
+spec:
+  capacity:
+    storage: 300M
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /Users/dante/Documents/Technique/k8s/project/openshift/statefulset/redis/cluster/data/pv1
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv2
+spec:
+  capacity:
+    storage: 300M
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /Users/dante/Documents/Technique/k8s/project/openshift/statefulset/redis/cluster/data/pv2
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv3
+spec:
+  capacity:
+    storage: 300M
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /Users/dante/Documents/Technique/k8s/project/openshift/statefulset/redis/cluster/data/pv3
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+  
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv4
+spec:
+  capacity:
+    storage: 300M
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /Users/dante/Documents/Technique/k8s/project/openshift/statefulset/redis/cluster/data/pv4
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv5
+spec:
+  capacity:
+    storage: 300M
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /Users/dante/Documents/Technique/k8s/project/openshift/statefulset/redis/cluster/data/pv5
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+```
+
+​	(3) 创建 Headless Service，每个 Pod 会获得一个域名，每个Pod的名称也是按顺序启动的，不同Pod间通过这个不变的域名进行通信。其中域名的格式
+
+```bash
+<podname>.<headless-service-name>.<namespace>.svc.cluster.local
+```
+
+```yaml
+### headless service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: dante
+  labels:
+    app: redis
+spec:
+  ports:
+  - name: redis-port
+    port: 6379
+  clusterIP: None
+  selector:
+    app: redis
+    appCluster: redis-cluster
+```
+
+（4）创建 statefulset
+
+```yaml
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: redis-app
+  namespace: dante
+spec:
+  serviceName: redis-service
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: redis
+        appCluster: redis-cluster
+    spec:
+      terminationGracePeriodSeconds: 20
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - redis
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: redis
+        image: redis:4.0.14
+        command:
+          - "redis-server"                  #redis启动命令
+        args:
+          - "/etc/redis/redis.conf"         #redis-server后面跟的参数,换行代表空格
+          - "--protected-mode"              #允许外网访问
+          - "no"
+        resources:                          #资源
+          requests:                         #请求的资源
+            cpu: "100m"                     #m代表千分之,相当于0.1 个cpu资源
+            memory: "100Mi"                 #内存100m大小
+        ports:
+            - name: redis
+              containerPort: 6379
+              protocol: "TCP"
+            - name: cluster
+              containerPort: 16379
+              protocol: "TCP"
+        volumeMounts:
+          - name: redis-conf            #挂载configmap生成的文件
+            mountPath: /etc/redis        #挂载到哪个路径下
+          - name: redis-data             #挂载持久卷的路径
+            mountPath: /var/lib/redis
+      volumes:
+      - name: redis-conf                    #引用configMap卷
+        configMap:
+          name: redis-conf
+          items:
+            - key: redis.conf             #创建configMap指定的名称
+              path: redis.conf            #里面的那个文件--from-file参数后面的文件
+  volumeClaimTemplates:                     #进行pvc持久卷声明,
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: local-storage
+      resources:
+        requests:
+          storage: 300M
+```
+
+（5）配置集群
+
+​	常用的 redis-tribe 工具进行集群的初始化，可使用我自己制作的镜像。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis-trib
+  namespace: dante
+  labels:
+    app: redis-trib
+spec:
+  containers:
+  - name: redis-trib
+    image: dante2012/redis:redis-trib
+  restartPolicy: Never
+```
+
+​	进入容器，进行集群创建
+
+```bash
+kubectl exec -it redis-trib bash -n dante
+
+## --replicas 1: 创建的集群中每个主节点分配一个从节点,达到3主3从
+## dig +short redis-app-0.redis-service.default.svc.cluster.local用于将Pod的域名转化为IP，这是因为redis-trib不支持域名来创建集群
+redis-trib create --replicas 1 \
+`dig +short redis-app-0.redis-service.dante.svc.cluster.local`:6379 \
+`dig +short redis-app-1.redis-service.dante.svc.cluster.local`:6379 \
+`dig +short redis-app-2.redis-service.dante.svc.cluster.local`:6379 \
+`dig +short redis-app-3.redis-service.dante.svc.cluster.local`:6379 \
+`dig +short redis-app-4.redis-service.dante.svc.cluster.local`:6379 \
+`dig +short redis-app-5.redis-service.dante.svc.cluster.local`:6379
+```
+
+​	测试，进入一个 redis pod 实例
+
+```bash
+kubectl exec -it redis-app-2 /bin/bash -n dante
+
+redis-cli -c
+127.0.0.1:6379> cluster info
+...
+127.0.0.1:6379> cluster nodes
+```
+
+（6）创建用于访问的 Service
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-access-service
+  namespace: dante
+  labels:
+    app: redis
+spec:
+  ports:
+  - name: redis-port
+    protocol: TCP
+    port: 6379
+    targetPort: 6379
+#   nodePort: 31000
+  selector:
+    app: redis
+    appCluster: redis-cluster
+# type: NodePort
+```
+
+（7）测试主从
+
+```bash
+## 1. 先查看一个实例的状态（redis-3为例）
+kubectl exec -it redis-app-3 /bin/bash -n dante
+redis-cli
+127.0.0.1:6379> role
+。。。查看输出
+
+## 2. 删除pod，redis-app-3
+kubectl delete po redis-app-3 -n dante
+
+## 3. redis-app-3 自动启动后，再按步骤1的方式进行查看实力状态
+```
+
+（8）动态扩容（4主4从）
+
+- 添加2个PV（add_pv.yaml）
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv6
+spec:
+  capacity:
+    storage: 300M
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /Users/dante/Documents/Technique/k8s/project/openshift/statefulset/redis/cluster/data/pv6
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv7
+spec:
+  capacity:
+    storage: 300M
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /Users/dante/Documents/Technique/k8s/project/openshift/statefulset/redis/cluster/data/pv7
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+```
+
+- 添加 redis 节点
+
+```bash
+### 方式1. 命令行
+kubectl scale --replicas=8 statefulset/redis-app -n dante
+kubectl scale --current-replicas=6 --replicas=8 statefulset/redis-app -n dante
+
+### 方式2. 修改yaml，将 replicas 改成 8
+kubectl apply -f redis-cluster.yaml
+```
+
+- 添加集群节点，在 redis-tribe pod中，执行命令
+
+```bash
+## add-node后面跟的是新节点的信息,后面是以前集群中的任意 一个节点
+redis-trib add-node \
+`dig +short redis-app-6.redis-service.default.svc.cluster.local`:6379 \
+`dig +short redis-app-0.redis-service.default.svc.cluster.local`:6379
+
+redis-trib add-node \
+`dig +short redis-app-7.redis-service.default.svc.cluster.local`:6379 \
+`dig +short redis-app-0.redis-service.default.svc.cluster.local`:6379
+```
+
+-  重新分配哈希槽
+
+```bash
+redis-trib reshard `dig +short redis-app-0.redis-service.default.svc.cluster.local`:6379
+```
+
+
+
+##### 哨兵模式
+
+
+
 **参考**
 
+- https://cloud.tencent.com/developer/article/1392872
 - https://www.jianshu.com/p/65c4baadf5d9
 
 ### 五. 探针

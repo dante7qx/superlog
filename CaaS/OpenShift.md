@@ -670,14 +670,14 @@ spec:
   ### 设置 preferredDuringSchedulingIgnoredDuringExecution
   	nodeAffinity:
   	  preferredDuringSchedulingIgnoredDuringExecution:
-  	  - weight: 20
+  	  - weight: 10
   	    preference:
   	      matchExpressions:
   	      - key: supergod
-              operator: IN
-              values:
-              - dante
-              - snake 
+            operator: IN
+            values:
+            - dante
+            - snake 
   ```
 
 - **Pod Affinity / Anti-Affinity**

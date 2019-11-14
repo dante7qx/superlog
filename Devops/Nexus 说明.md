@@ -204,6 +204,8 @@ mvn deploy:deploy-file -DgroupId=com.hnair.consumer -DartifactId=crs-security-ut
 ```
 ### 五. Nexus3
 
+admin/admin@Pwd12345
+
 #### 1. Docker仓库
 
 - 使用 Docker 的方式启动 Nexus3
@@ -218,6 +220,7 @@ docker run -d -p 8083:8081 \
               -p 8085:8085  \
               -p 8086:8086  \
               --name dante-nexus3 \
+              -e TZ=Asia/Shanghai \
               -v /Users/dante/Documents/Technique/Docker/volume/nexus3:/nexus-data \
               sonatype/nexus3:3.17.0 
 ```
@@ -282,8 +285,6 @@ latest: Pulling from nginx
 
 - 高级用法
 
-
-
 参考：
 
 - https://segmentfault.com/a/1190000015629878
@@ -291,6 +292,132 @@ latest: Pulling from nginx
 - https://www.hifreud.com/2018/06/05/02-nexus-docker-repository
 - https://help.sonatype.com/repomanager3/formats/docker-registry
 - https://juejin.im/post/5c70a8156fb9a049f746d0fc
+- https://cloud.tencent.com/developer/article/1478476
+
+#### 2. Pip仓库
+
+-  pypi（proxy）
+
+  远程仓库
+
+  - https://mirrors.aliyun.com/pypi
+  - https://pypi.python.org
+
+![pypi-proxy](./images/pypi/pypi-proxy.png)
+
+- pypi（hosted）
+
+![pypi-hosted](./images/pypi/pypi-hosted.png)
+
+- pypi（group）
+
+![pypi-group](./images/pypi/pypi-group.png)
+
+客户端使用
+
+- 配置 pip 私服（**地址后必须要加上 /simple**）
+
+  - 方式一
+
+  ```ini
+  ## 只从外部获取依赖
+  pip config set global.index-url http://x.dante.com:8083/repository/pypi-proxy/simple
+  ## 从外部获取依赖并且可以上传私有python包，使用pypi-group
+  pip config set global.index-url http://x.dante.com:8083/repository/pypi-group/simple
+  pip config set global.timeout 6000
+  pip config set install.trusted-host x.dante.com
+  ```
+
+  - 方式二
+
+    创建 $User_home/.config/pip/pip.conf
+
+  ```ini
+  [global]
+  index-url = http://x.dante.com:8083/repository/pypi-group/simple
+  timeout = 6000
+  
+  [install]
+  trusted-host = x.dante.com
+  ```
+
+  
+
+- 下载依赖
+
+```ini
+pip install PyYAML==5.1.2  
+```
+
+参考：
+
+- https://help.sonatype.com/repomanager3/formats/pypi-repositories
+- https://blog.csdn.net/m0_37607365/article/details/79998955
+- https://blog.csdn.net/DILIGENT203/article/details/85220463
+
+#### 3. npm 仓库
+
+- Blob Store
+
+![npm-store](./images/npm/npm-store.png)
+
+- npm（proxy）
+
+  远程仓库
+
+  - https://registry.npm.taobao.org
+
+  - https://registry.npmjs.org
+
+![npm-proxy](./images/npm/npm-proxy.png)
+
+- npm（hosted）
+
+![npm-hosted](./images/npm/npm-hosted.png)
+
+- npm（group）
+
+![npm-group](./images/npm/npm-group.png)
+
+
+
+- 客户端使用
+
+  - npm 命令方式
+
+  ```ini
+  ## 临时使用
+  npm --registry http://x.dante.com:8083/repository/npm-group install express
+  ## 永久使用
+  ## npm config set registry https://registry.npm.taobao.org
+  npm config set registry http://x.dante.com:8083/repository/npm-group
+  ```
+
+  - .npmrc（$User_home/.npmrc）
+
+  ```ini
+  cd $User_home
+  touch .npmrc
+  vi .npmrc
+  ## 键入内容
+  registry=http://x.dante.com:8083/repository/npm-group
+  ```
+
+  验证：npm config get registry
+
+- 参考资料
+
+  - https://zhuanlan.zhihu.com/p/35907412
+  - https://help.sonatype.com/repomanager3/formats/npm-registry#NpmRegistry-ProxyingnpmRegistries
+
+#### 4. Maven仓库
+
+
+
+
+
+- 参考资料
+  - https://www.cnblogs.com/mengjinluohua/p/8529345.html
 
 ### 八. 常见问题
 
@@ -326,3 +453,7 @@ Non-resolvable import POM: Failure to find .. was cached in the local repository
 
 - http://stackoverflow.com/questions/4856307/when-maven-says-resolution-will-not-be-reattempted-until-the-update-interval-of/41391500#41391500
 - http://maven.apache.org/ref/3.3.9/maven-settings/settings.html
+
+#### 2. 下载缓慢
+
+- https://imshuai.com/sonatype-nexus-maven-group-downloading-slow
