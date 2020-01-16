@@ -1495,7 +1495,7 @@ kubectl apply -f redis-cluster.yaml
 - 添加集群节点，在 redis-tribe pod中，执行命令
 
 ```bash
-## add-node后面跟的是新节点的信息,后面是以前集群中的任意 一个节点
+## add-node后面跟的是新节点的信息,后面是以前集群中的任意一个节点
 redis-trib add-node \
 `dig +short redis-app-6.redis-service.default.svc.cluster.local`:6379 \
 `dig +short redis-app-0.redis-service.default.svc.cluster.local`:6379

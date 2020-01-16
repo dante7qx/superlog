@@ -14,6 +14,7 @@
 
   - [Consul](服务注册中心/Consul/Consul 指南.md)
   - [Etcd](服务注册中心/etcd/ETCD 指南.md)
+  - [Zookeeper](服务注册中心/Zookeeper/Zookeeper 说明.md)
 * 软件负载器
   - [Nginx](LoadBalance/Nginx.md)
   - [HAProxy](LoadBalance/HAProxy.md)
