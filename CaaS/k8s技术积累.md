@@ -2,8 +2,6 @@
 
 ### 一. Secrets
 
-
-
 ​	k8s Secret 用来存储少量敏感的数据，例如数据库、Gitlab的用户、密码。这样可以不在 Image 中去保留敏感信息，并且可以在多个 Pod 中共享这些 Secret。因为 k8s 使用 JWT 的方式进行加密，所以需要加密的数据必须先进行 base64 编码。参考 https://kubernetes.io/docs/concepts/configuration/secret。
 
 ​        Secret 有三种类型。
@@ -361,10 +359,13 @@ Local PV 在 k8s 1.14版本已经提升为GA。Local PV 代表一个可以直接
   参考： https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner#user-guide
 
 ```yaml
-
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
 ```
-
-
 
 **参考：**
 
@@ -374,6 +375,44 @@ Local PV 在 k8s 1.14版本已经提升为GA。Local PV 代表一个可以直接
 - https://cloud.tencent.com/info/a69596dd6dcc4be3488006b100b7dd91.html
 - https://jimmysong.io/posts/kubernetes-persistent-volume/
 - https://github.com/kubernetes-incubator/external-storage
+
+#### 6. 挂载传播
+
+卷的挂载传播由 Container.volumeMounts 的 mountPropagation 字段控制。它的值有
+
+- **None：** 这种卷挂载将不会收到任何后续由 host 创建的在这个卷上或其子目录上的挂载。同样的，由容器创建的挂载在 host 上也是不可见的。这是默认的模式。这个其实很好理解，就是容器内和 host 的后续挂载完全隔离。
+
+- **HostToContainer：**这种卷挂载将会收到之后所有的由 host 创建在该卷上或其子目录上的挂载。换句话说，如果 host 在卷挂载内挂载的任何内容，在容器中都是可见的。
+
+  ![挂载传播](./挂载传播.png)
+
+- **Bidirectional：** 这种挂载机制和 `HostToContainer` 类似。此外，任何在容器中创建的挂载都会传播到 host，然后传播到使用相同卷的所有 Pod 的所有容器。注意：Bidirectional 挂载传播是很危险的。可能会危害到 host 的操作系统。因此只有特权容器在允许使用它。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+    name: mount-a
+    namespace: default
+    label:
+      app: mount
+spec:
+    containers:
+    - name: main
+      image: nginx:latest
+      volumeMounts:
+      - name: testmount
+        mountPath: /home
+        mountPropagation: None ## None、HostToContainer、Bidirectional
+    volumes:
+    - name: testmount
+      hostPath:
+        path: /mnt/
+```
+
+**参考：**
+
+- [https://www.myway5.com/index.php/2020/04/05/kubernetes-%E7%9A%84%E6%8C%82%E8%BD%BD%E4%BC%A0%E6%92%ADmount-propagation%E6%9C%BA%E5%88%B6/](https://www.myway5.com/index.php/2020/04/05/kubernetes-的挂载传播mount-propagation机制/)
 
 ### 三. PDB
 
@@ -450,6 +489,91 @@ spec:
   selector:
     app: zk
 ```
+
+**Pod管理策略：**
+
+对于某些分布式应用来说，StatefulSet 的顺序性保证是不应该的，可以通过设置 podManagementPolicy 来设置Pod的管理策略。
+
+- podManagementPolicy: "OrderedReady"
+
+  默认配置。Pod按顺序启动（从小到大）和停止（从大到小），当前Pod要等待上一次Pod完全ok。
+
+- podManagementPolicy: "Parallel"
+
+  并行的启动或终止Pod，不必等待上一个Pod完成。
+
+**分段更新：**
+
+可以通过 statefulset.spec.updateStrategy.rollingUpdate.partition 来设置 StatefulSet 的分区。默认是0。 每次只更新Pod序号大于等于分区的Pod，小于分区的Pod使用原来的配置。例如：
+
+创建一个 StatefulSet
+
+```yaml
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: sts-pod-ip
+  namespace: dante
+spec:
+  podManagementPolicy: OrderedReady
+  serviceName: sts-pod-ip-service
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: sts-pod-ip
+    spec:
+      terminationGracePeriodSeconds: 20
+      containers:
+      - name: sts-pod-ip
+        image: dante2012/centos:7.5.1804
+        command: ["/bin/sh", "-c", "touch /tmp/healthy; sleep 20m"]     
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /tmp/healthy
+          initialDelaySeconds: 5
+          periodSeconds: 5          
+        resources:                          
+          requests:                         
+            cpu: "100m"                    
+            memory: "100Mi"                
+```
+
+```bash
+$ kubectl -n dante get po                                                                                  
+NAME           READY   STATUS    RESTARTS   AGE
+sts-pod-ip-0   1/1     Running   0          6s
+sts-pod-ip-1   1/1     Running   0          11m
+sts-pod-ip-2   1/1     Running   0          11m
+sts-pod-ip-3   1/1     Running   0          4m5s
+sts-pod-ip-4   1/1     Running   0          4m37s
+```
+
+设置partition=3
+
+```bash
+kubectl -n dante patch statefulset sts-pod-ip -p '{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":3}}}}'
+```
+
+更新 StatefulSet
+
+```yaml
+kubectl -n dante patch statefulset sts-pod-ip --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/image", "value":"dante2012/oraclelinux:7.4"}]'
+```
+
+查看效果，只有sts-pod-ip-3、sts-pod-ip-4更新了镜像，0、1、2未更新
+
+```bash
+$ kubectl -n dante get po sts-pod-ip-0 --template '{{range $i, $c := .spec.containers}}{{$c.image}}{{end}}'
+dante2012/centos:7.5.1804%  
+
+$ kubectl -n dante get po sts-pod-ip-3 --template '{{range $i, $c := .spec.containers}}{{$c.image}}{{end}}'  
+dante2012/oraclelinux:7.4% 
+```
+
+**场景：可用于灰度扩容**
 
 **参考：**
 
@@ -1922,4 +2046,52 @@ spec:
 ```bash
 kubectl delete secrets harborsecret
 ```
+
+### 十一. 容器资源限制
+
+Pod中运行容器有两个限制
+
+- 需求限制（软限制 Requests）：即运行Pod的节点必须满足运行Pod的最基本需求才能运行Pod。例如：Pod运行至少需要2G内存，1核CPU。
+- 资源限制（硬限制 Limits）：即运行Pod期间，可能内存使用量会增加，那最多能使用多少内存。
+
+Limits >= Requests，并且requests 和 limits 通常要一起配置，若只配置了requests，而不配置limits，则很可能导致Pod会吃掉所有资源。
+
+CPU：1物理核 —> 2逻辑核  —> 1000millicore
+
+**QoS类型：**
+
+Guranteed:
+　　每个容器的CPU，RAM资源都设置了相同值的requests 和 limits属性。
+　　简单说： cpu.limits = cpu.requests
+　　　　　　memory.limits = memory.requests
+　　这类Pod的运行优先级最高，但凡这样配置了cpu和内存的limits和requests，它会自动被归为此类。
+Burstable:
+　　每个容器至少定义了CPU，RAM的requests属性，这里说每个容器是指：一个Pod中可以运行多个容器。
+　　那么这类容器就会被自动归为burstable，而此类就属于中等优先级。
+BestEffort:
+　　没有一个容器设置了requests 或 limits，则会归为此类，而此类别是最低优先级。
+
+**QoS类型的作用：**
+
+当Node资源紧张时，K8s就会根据QoS类别来选择Kill掉一部分Pod，删除的优先级是
+
+BestEffort > Burstable > Guranteed
+
+**BestEffort**: 谁占用的资源最多，就先删除谁。
+
+**Burstable**:
+
+​      PodA: 启动时设置了memory.request=512M , memory.limits=1G
+​      PodB: 设置为: memory.requests=1G, memory.limits=2G
+
+​      PodA: 运行了一段时间后，占用了500M了，它可能还有继续申请内存。
+​      PodB: 它则占用了512M内存了，但它可能也还需要申请内存。
+
+​	  优先kill PodA，因为它启动时，说自己需要512M内存就够了，但你现在这么积极的申请内存，都快把你需求的内存吃完了，只能说明你太激进了，因此会先kill。而PodB，启动时需要1G，但目前才用了一半，说明它比较温和，因此不会先kill它。
+
+参考：
+
+- https://www.cnblogs.com/wn1m/p/11291235.html
+
+
 

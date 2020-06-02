@@ -165,12 +165,16 @@ Kafka提供了两套consumer api，分为high-level api和sample-api。
 
 - Docker：
 
+  - https://hub.docker.com/r/bitnami/kafka
+  
   - https://hub.docker.com/r/wurstmeister/kafka
   - https://github.com/wurstmeister/kafka-docker/wiki/Connectivity
   - https://www.jianshu.com/p/a37e1b2705e3
+  
 - Config：
 
   - https://www.cnblogs.com/lujinhong2/p/4686483.html
+  
 - Blog
 
   - https://www.cnblogs.com/cyfonly/p/5954614.html

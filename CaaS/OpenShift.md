@@ -765,7 +765,6 @@ spec:
   imagePullPolicy: IfNotPresent
   nodeSelector:
     supergod: dante
-
 ```
 
 - **Taints and Tolerations（污点 和 容忍）**

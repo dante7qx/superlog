@@ -110,8 +110,7 @@ org.springframework.cloud.gateway.actuate.GatewayControllerEndpoint
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-devtools</artifactId>
-    <optional>true</optional>
+    <artifactId>spring-boot-actuator</artifactId>
 </dependency>
 ```
 

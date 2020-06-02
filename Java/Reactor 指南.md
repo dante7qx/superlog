@@ -139,7 +139,7 @@ subscribe(Consumer<? super T> consumer,
    public final Mono<T> filter(Predicate<? super T> tester) 
    ```
 
-   zip：多个流==**一对一**==的合并起来。
+   zip：多个流**一对一**的合并起来。
 
    ```java
    // 对两个Flux/Mono流每次各取一个元素，合并为一个二元组（Tuple2）
@@ -288,7 +288,7 @@ Note left of Publisher: 持续调用 onNext 发送数据
 Publisher->Subscriber: 数据发送完毕，调用onComplete通知Subscriber
 ```
 
-![Reactive流程](./Reactive流程.png)
+![Reactive流程](./Reactor/Reactive流程.png)
 
 ###### 4） 数据流
 

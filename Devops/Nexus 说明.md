@@ -202,7 +202,15 @@ mvn deploy:deploy-file -DgroupId=com.hnair.consumer -DartifactId=crs-security-ut
 注意事项:
 -DrepositoryId=nexus-releases 对应的就是Maven中settings.xml的认证配的名字
 ```
-### 五. Nexus3
+### 五. Nexus2
+
+admin/admin123
+
+#### 1. npm仓库
+
+
+
+### 六. Nexus3
 
 admin/admin@Pwd12345
 
