@@ -54,7 +54,14 @@ Actor模型描述了一组为避免并发编程的公理：
 
 - Actor可能会堵塞自己但Actor不应该堵塞自己运行的线程
 
-### 五. 参考资料
+### 五. Actor实例
+
+```shell
+Actor       <--   通信         -->  Actor：（异步通信）
+Verticle    <--   Event Bus   -->  Verticle：（事件驱动模型、异步通信）
+```
+
+### 六. 参考资料
 
 - https://www.jianshu.com/p/449850aa8e82
 - https://www.jianshu.com/p/d803e2a7de8e
