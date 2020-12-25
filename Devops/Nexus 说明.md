@@ -336,7 +336,7 @@ latest: Pulling from nginx
   pip config set install.trusted-host x.dante.com
   ```
 
-  - 方式二
+  - x方式二
 
     创建 $User_home/.config/pip/pip.conf
 

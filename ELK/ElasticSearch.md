@@ -51,7 +51,72 @@ Elasticsearch 中的数据库。只是一个用来指向一个或多个**分片(
 - **索引（动词）**，**「索引一个文档」**表示把一个文档存储到**索引（名词）**里，以便它可以被检索或者查询。这很像SQL中的`INSERT`关键字，差别是，如果文档已经存在，新的文档将覆盖旧的文档。
 - **倒排索引**， 传统数据库为特定列增加一个索引，例如B-Tree索引来加速检索。Elasticsearch和Lucene使用一种叫做**倒排索引(inverted index)**的数据结构来达到相同目的。即由属性值来确定记录的位置。
 
+### 四. 安装
+
+#### 1. Docker 集群
+
+```yaml
+version: '3'
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=dante-es-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /Users/dante/Documents/Technique/Docker/volume/elasticsearch/node1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=dante-es-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /Users/dante/Documents/Technique/Docker/volume/elasticsearch/node2:/usr/share/elasticsearch/data
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=dante-es-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /Users/dante/Documents/Technique/Docker/volume/elasticsearch/node3:/usr/share/elasticsearch/data
+```
+
+
+
+#### 2. Kubernetes集群
+
 ### 五. 参考资料
 
 - https://www.elastic.co/
 - https://es.xiaoleilu.com/
+- https://www.elastic.co/guide/en/elasticsearch/reference/7.5/docker.html
+- https://juejin.im/post/6844904087100588045

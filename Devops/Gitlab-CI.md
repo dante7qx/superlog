@@ -47,7 +47,7 @@ web:
 
 ```sh
 docker run -d --name dante-gitlab-runner  \
-  # -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /var/run/docker.sock:/var/run/docker.sock \
   -v /Users/dante/Documents/Technique/Docker/volume/gitlab/runner:/etc/gitlab-runner \
   gitlab/gitlab-runner:bleeding
 ```
@@ -55,9 +55,7 @@ docker run -d --name dante-gitlab-runner  \
 - 向 gitlab server 注册 runner
 
   ```sh
-  docker exec -it dante-gitlab-runner gitlab-ci-multi-runner register
+  docker exec -it dante-gitlab-runner gitlab-runner register
   ```
 
-  ![register-runner](./images/gitlab-ci/register-runner.png)
-
-  
+  注意：在 dante-gitlab-runner 中的 /etc/hosts 下，添加 `本机IP  x.dante.com`

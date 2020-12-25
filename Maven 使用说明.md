@@ -49,8 +49,9 @@
 
 8. 打包
 
-   ```
+   ```shell
    mvn package
+   mvn package -Dmaven.repo.local=/Users/dante/Desktop/aa
    ```
 
 9. 在本地安装

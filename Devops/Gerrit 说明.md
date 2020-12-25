@@ -152,6 +152,7 @@ Reindexed 2 documents in projects index in 0.2s (10.2/s)
   ```bash
   ## 可以添加多个用户
   htpasswd -c /Users/dante/Documents/Technique/Gerrit/etc/gerrit.password dante
+  ```
 ```
   
 - 配置nginx反向代理
@@ -173,7 +174,7 @@ Reindexed 2 documents in projects index in 0.2s (10.2/s)
        }
   }
 ```
-  
+
 - 设置Gerrit 755 权限
   
   ```bash
@@ -239,12 +240,6 @@ git pull origin master
 ## 推送到 Gerrit 服务器
 git push origin HEAD:refs/for/master
 ```
-
-
-
-
-
-
 
 ### 六. 参考资料
 

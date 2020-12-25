@@ -438,6 +438,7 @@ if(user != null) {
 - http://www.importnew.com/22060.html
 - http://www.jdon.com/dl/best/java-1-8-optional-jpa-and-hibernate.html
 - http://www.importnew.com/22060.html
+- https://juejin.im/post/6844903791909666823（JVM GC 日志详解）
 
 
 

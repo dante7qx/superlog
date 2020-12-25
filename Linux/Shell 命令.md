@@ -200,3 +200,12 @@ drwx------+  20 dante  staff        640  5 22 10:59 .
 drwxr-xr-x+ 122 dante  staff       3904  5 20 11:46 ..
 ```
 
+### 三. Awk实例 
+
+#### 1. 自定义镜像总大小
+
+```bash
+## gsub 替换
+docker images | grep dante2012 | awk '{print $NF}' | awk '{gsub("MB", "", $0); print $1}' | awk '{sum+=$1} END {print sum"MB"}'
+```
+
