@@ -52,6 +52,7 @@
   - [WebSocket](SpringBoot/SpringWebSocket.md)
   - [SpringSecurity](SpringBoot/SpringSecurity.md)
   - [SpringBatch](SpringBoot/SpringBatch.md)
+  - [Resilience4j](SpringBoot/Resilience4j.md)
 * SpringCloud
 
   - [Eureka](SpringCloud/Eureka.md)
