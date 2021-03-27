@@ -101,3 +101,6 @@
   - [Tcpdump](Linux/Tcpdump 命令.md)
   - [Shell](Linux/Shell 命令.md)
 
+- 入、出
+  - [谢尽铅华](诗/谢尽铅华.md)
+
