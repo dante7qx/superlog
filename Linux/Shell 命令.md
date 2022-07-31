@@ -200,6 +200,22 @@ drwx------+  20 dante  staff        640  5 22 10:59 .
 drwxr-xr-x+ 122 dante  staff       3904  5 20 11:46 ..
 ```
 
+#### 5. exec 命令
+
+exec 执行程序在父进程中直接执行，exec的执行不会返回以前的shell，而是直接把以前登陆shell作为一个程序看待，在其上进行复制。
+
+```shell
+(1) 在当前目录下(包含子目录)，查找所有txt文件并找出含有字符串”bin”的行
+find ./ -name "*.txt" -exec grep "bin" {}
+(2) 在当前目录下(包含子目录)，删除所有txt文件
+find ./ -name "*.txt" -exec rm {}
+```
+
+参考：
+
+- http://xstarcd.github.io/wiki/shell/exec_redirect.html
+- https://blog.51cto.com/u_5404542/1786753
+
 ### 三. Awk实例 
 
 #### 1. 自定义镜像总大小
@@ -207,5 +223,28 @@ drwxr-xr-x+ 122 dante  staff       3904  5 20 11:46 ..
 ```bash
 ## gsub 替换
 docker images | grep dante2012 | awk '{print $NF}' | awk '{gsub("MB", "", $0); print $1}' | awk '{sum+=$1} END {print sum"MB"}'
+```
+
+### 四. 案例
+
+#### 1. 统计当前目录中以.html结尾的文件总和
+
+```shell
+find ./ -name "*.html" -exec du -k {} \; | awk '{sum+=$1} END {print sum"kb"}'
+```
+
+#### 2. 批量修改文件名
+
+```shell
+## 方式一
+for file in $(find ./ -maxdepth 1 -name "*.html"); do
+		mv $file kk_${file#*_}
+done
+
+## 方式二
+## mac
+rename 's/aa/bb/' *.html
+## linux
+rename aa bb *.html
 ```
 

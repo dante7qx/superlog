@@ -114,6 +114,64 @@ https://stackoverflow.com/questions/38276341/jenkins-ci-pipeline-scripts-not-per
 <arguments>-Dpermissive-script-security.enabled=true -Xrs -Xmx4096m -Dhudson.lifecycle=hudson.lifecycle.WindowsServiceLifecycle -jar "%BASE%\jenkins.war" --httpPort=80 --webroot="%BASE%\war"</arguments>
 ```
 
+#### 3. 添加Node
+
+##### （1）Linux
+
+​	Jenkins Node 代理服务器
+
+ - 使用root用户，登录代理服务器（node节点）
+
+ - 安装JDK
+
+ - 创建用户
+
+   在代理Node上创建一个用户。 Jenkins master 将以该用户身份登录代理，所有构建作业都将以该用户身份执行。 新用户将被称为 jenkins，并以 /var/lib/jenkins 作为主目录
+
+   ```shell
+   # sudo useradd -d /var/lib/jenkins jenkins
+   # passwd jenkins
+   ```
+
+ - 生成 ssh key
+
+   生成一个 ssh 密钥。 Jenkins 将使用此密钥向代理节点进行身份验证，并以 jenkins 用户身份登录。 该密钥几乎可以在任何 Linux 机器上生成，但您也可以在代理节点本身上生成并将其复制到新的代理节点。
+
+   ```shell
+   # su - jenkins
+   # ssh-keygen -t rsa -C "Jenkins agent key"
+   
+   ## 将公共 SSH 密钥 id_rsa.pub 添加到授权密钥文件列表中
+   # cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+   # chmod 600 ~/.ssh/authorized_keys
+   ```
+
+   **注意：私钥 id_rsa 后面要用到**
+
+​	Jenkins Master 服务器
+
+ - 添加node
+
+   ![配置Node](./images/配置Node.png)
+
+ - 设置 Credentials
+
+   ![配置密钥](./images/配置密钥.png)
+
+##### （2）Windows
+
+ - 全局安全配置下，代理-**TCP port for inbound agents**，指定端口要放开
+ - Windows 下，在Jenkins工作目录下，创建 slave_node文件夹
+   - 将 agent.jar 放到这个目录
+   - 编写启动bat
+
+```powershell
+@echo off
+%1 mshta vbscript:CreateObject("WScript.Shell").Run("%~s0 ::",0,FALSE)(window.close)&&exit
+java -jar agent.jar -jnlpUrl http://192.168.0.7:9000/computer/WindowTest/jenkins-agent.jnlp -secret 6fb2f9fbc7ea090f33f5475a7a55eafa62f4437d408597305b70efe93ec1aaad -workDir "C:\jenkins" > ./slave.log 2>&1 &
+exit
+```
+
 ### 四. Pipeline 
 
 #### 1. Credentials
@@ -268,3 +326,4 @@ https://shekhargulati.com/2019/02/09/using-jenkins-config-file-provider-plugin-t
 - https://www.w3cschool.cn/jenkins/
 - https://www.xncoding.com/2017/03/22/fullstack/jenkins02.html
 - https://updates.jenkins-ci.org/download/plugins/（插件下载）
+- https://www.cnblogs.com/h--d/p/11186529.html（启动设置）

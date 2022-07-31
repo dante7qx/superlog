@@ -60,7 +60,7 @@ JWT 由三部分组成，**Header**、**Payload**、**Signature**，他们通过
   jti: jwt的唯一身份标识，主要用来作为一次性token,从而回避重放攻击。
   ```
 
-- **Signature**：签名，根据 秘钥、Header 中的算法，将 编码（Base64）后的Header、Payload 进行签名
+- **Signature**：签名，根据秘钥、Header 中的算法，将编码（Base64）后的Header、Payload 进行签名
 
   ```javascript
   HMACSHA256(
@@ -230,7 +230,7 @@ $.ajax({
          JwsHeader<?> header = parseClaimsJws.getHeader();
          Claims body = parseClaimsJws.getBody();
          String sign = parseClaimsJws.getSignature();
-
+   
          System.out.println(header.getType() + ' ' + header.getAlgorithm());
          System.out.println(body);
          System.out.println(sign);
@@ -241,7 +241,7 @@ $.ajax({
          // jwt 已经过期，在设置jwt的时候如果设置了过期时间，这里会自动判断jwt是否已经过期，如果过期则会抛出这个异常，我们可以抓住这个异常并作相关处理。
          System.out.println(e.getMessage());
        }
-
+   
    ```
 
 ### 八. 参考资料

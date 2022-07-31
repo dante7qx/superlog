@@ -212,7 +212,7 @@ server {
 	access_log  logs/reverse-proxy.access.log  main;
 
 	location / {
-  		proxy_pass http://localhost:8100;
+  	proxy_pass http://localhost:8100;
 		proxy_set_header Host $host:$server_port;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_redirect off; # 关闭重定向  

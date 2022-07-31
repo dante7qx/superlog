@@ -37,10 +37,10 @@ https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.18-winx64-debug-test.zip
   # *** upgrade to a newer version of MySQL.
 
   [client]
-  default-character-set=utf8
+  default-character-set=utf8mb4
 
   [mysqld]
-  character-set-server=utf8
+  character-set-server=utf8mb4
 
   # Remove leading # and set to the amount of RAM for the most important data
   # cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%.
@@ -183,7 +183,7 @@ https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.18-winx64-debug-test.zip
    ```sh
   [client]
   default-character-set=utf8
-
+  
   [mysqld]
   character-set-server=utf8
    ```

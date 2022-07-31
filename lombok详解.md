@@ -133,7 +133,43 @@ private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Lo
 private static final org.slf4j.ext.XLogger log = org.slf4j.ext.XLoggerFactory.getXLogger(LogExample.class);
 ```
 
-### 4. 参考资料
+### 4. 注意点
+
+- 类比较问题
+
+  当使用 @Data 注解的类需要进行 equals() 比较时，需要注意
+
+  - lombok 自动生成的 equals 和 hashCode 方法，会去比较类中所有的属性。
+
+  - 当类有继承关系时，lombok 默认不会调用父类的属性，即 @EqualsAndHashCode(callSuper = false)
+
+  **建议：**需要进行类对象比较时，自己重写 equals() 和 hashCode() 方法。
+
+
+- 第一个字母小写，第二个字母大写的属性
+
+  ​	类似 `private String nMetaType;`这样的属性，Lombok 生成的 setter 方法如下
+
+  ```java
+  public void setNMetaType(String nMetaType) {
+  		this.nMetaType = nMetaType;
+  }
+  ```
+
+  Mybatis，Java官方默认的行为为
+
+  ```java
+  public void setnMetaType(String nMetaType) {
+  		this.nMetaType = nMetaType;
+  }
+  ```
+
+  **建议：**
+
+  1.修改属性名字，让第二个字母小写，或者说是规定所有的属性的前两个字母必须小写。
+2.如果数据库已经设计好，并且前后端接口对接好了，不想修改，那就专门为这种特殊的属性使用 IDE 生成get-set方法。
+
+### 5. 参考资料
 
 - https://projectlombok.org/features/all
 

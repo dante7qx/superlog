@@ -4,7 +4,8 @@
 
 #### 1. firewalld
 
-
+- https://www.cnblogs.com/huchong/p/9669737.html
+- https://wangchujiang.com/linux-command/c/firewall-cmd.html	
 
 #### 2. 字符串
 

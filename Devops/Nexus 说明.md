@@ -8,6 +8,8 @@
 
 ### 二. 安装
 
+#### Mac
+
 1. 下载nexus([http://www.sonatype.com/download-oss-sonatype](http://www.sonatype.com/download-oss-sonatype)) 最新版本nexus-3.3.1-01-mac.tgz
 
 ```shell
@@ -65,6 +67,88 @@ nexus-context-path=/
 nexus-edition=nexus-pro-edition
 nexus-features=nexus-pro-feature
 ```
+
+#### Centos
+
+1. 创建nexus目录
+
+   ```bash
+   mkidr /data/nexus
+   mv nexus-3.40.1-01-unix.tar.gz /data/nexus
+   cd /data/nexus
+   tar -zxvf nexus-3.40.1-01-unix.tar.gz
+   ```
+
+2. 设置用户、权限、打开文件限制
+
+   ```bash
+   useradd --system --no-create-home nexus
+   chown -hR nexus:nexus /data/nexus/nexus-3.40.1-01
+   chown -hR nexus:nexus /data/nexus/sonatype-work
+   vi /etc/security/limits.conf
+   ## 添加 
+   nexus - nofile 65536
+   ```
+
+3. 配置nexus
+
+   在 /data/nexus/nexus-3.40.1-01/bin 下
+
+   - nexus.vmoptions（配置目录、[启动内存](https://help.sonatype.com/repomanager3/product-information/system-requirements)）
+   - nexus.rc（配置nexus服务用户）
+
+   ```ini
+   run_as_user="nexus"
+   ```
+
+   在 /data/nexus/nexus-3.40.1-01/etc 下
+
+   - nexus-default.properties （监听地址、端口）
+
+   ```ini
+   application-port=8081
+   application-host=0.0.0.0
+   ```
+
+4. 设置Nexus为Systemd服务（有问题，/bin/nexus 的权限总是提示不足）
+
+   在 /etc/systemd/system/ 中创建Systemd服务文件
+
+   ```shell
+   touch /etc/systemd/system/nexus.service
+   ```
+
+   ```ini
+   [Unit]
+   Description=nexus service
+   After=network.target
+   
+   [Service]
+   Type=forking
+   LimitNOFILE=65536
+   ExecStart=/data/nexus/nexus-3.40.1-01/bin/nexus start
+   ExecStop=/data/nexus/nexus-3.40.1-01/bin/nexus stop
+   User=nexus
+   Restart=on-abort
+   
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+5. 启动服务
+
+   ```bash
+   systemctl daemon-reload
+   ## 开机启动
+   systemctl enable nexus.service
+   ## 启动nexus
+   systemctl start nexus
+   
+   ## 查看日志
+   tail -f /data/nexus/sonatype-work/nexus3/log/nexus.log
+   ```
+
+   
 
 ### 三. 使用
 
@@ -197,7 +281,16 @@ nexus-features=nexus-pro-feature
 2. **第三方Jar上传到Nexus**
 
 ```sh
-mvn deploy:deploy-file -DgroupId=com.hnair.consumer -DartifactId=crs-security-util -Dversion=1.0 -Dpackaging=jar -Dfile=/Users/dante/Desktop/HnaSecurityUtils.jar -Durl=http://52.80.42.108:8090/repository/3rdParty/ -DrepositoryId=nexus-releases
+mvn deploy:deploy-file \
+	-DgroupId=com.hnair.consumer \
+	-DartifactId=crs-security-util \
+	-Dversion=1.0 \
+	-Dpackaging=jar \
+	-Dfile=/Users/dante/Desktop/HnaSecurityUtils.jar \
+	-Durl=http://52.80.42.108:8090/repository/3rdParty/ \
+	-DrepositoryId=maven-thirdparty \
+	-Drepo.user=deployer \
+	-Drepo.pass=Ry@8989!
 
 注意事项:
 -DrepositoryId=nexus-releases 对应的就是Maven中settings.xml的认证配的名字
@@ -334,6 +427,9 @@ latest: Pulling from nginx
   pip config set global.index-url http://x.dante.com:8083/repository/pypi-group/simple
   pip config set global.timeout 6000
   pip config set install.trusted-host x.dante.com
+  
+  ## 或者
+  pip install urllib3 --trusted-host x.dante.com -i http://x.dante.com:8083/repository/pypi-proxy/simple
   ```
 
   - x方式二
@@ -397,7 +493,7 @@ pip install PyYAML==5.1.2
   ## 临时使用
   npm --registry http://x.dante.com:8083/repository/npm-group install express
   ## 永久使用
-  ## npm config set registry https://registry.npm.taobao.org
+  ## npm config set registry https://registry.npmmirror.com
   npm config set registry http://x.dante.com:8083/repository/npm-group
   ```
 
@@ -425,6 +521,8 @@ pip install PyYAML==5.1.2
 
 
 - 参考资料
+  - https://wiki.eryajf.net/pages/45c5da/
+  - https://www.toutiao.com/article/7088346410491412995/?traffic_source=&in_ogs=&utm_source=&source=search_tab&utm_medium=wap_search&original_source=&in_tfs=&channel=&enter_keyword=nexus%E4%B8%8B%E8%BD%BD%E5%85%A8%E9%83%A8%E4%BB%A3%E7%A0%81&source=m_redirect
   - https://www.cnblogs.com/mengjinluohua/p/8529345.html
 
 ### 八. 常见问题
