@@ -158,9 +158,21 @@ exit 0
 
 #### 3. 热备高可用
 
-​	利用 Keepalived 实现 HAProxy 的热备。即两台主机上的两个HAProxy实例同时在线，其中权重较高的实例为MASTER，MASTER出现问题时，另一台实例自动接管所有流量。
+通过配置弹性网卡在两台服务器由keepalived虚拟出内网ip，申请弹性公网ip绑定到这个弹性网卡上，域名直接dns解析设置弹性公网ip即可。
 
- 	具体原理，在两台 HAProxy 的主机上分别运行着一个 Keepalived 实例，两个 Keepalived 同时争抢同一个 VIP，两个 HAProxy 也尝试去绑定这同一个 VIP上的端口。Keepalived内部维护一个权重值，权重值最高的Keepalived实例能够抢到 VIP，成为 MASTER。同时Keepalived会定期check本主机上的HAProxy状态，状态OK时权重值增加。
+参考：
+
+https://www.ucloud.cn/yun/129110.html（配置场景）
+
+https://blog.csdn.net/smilehappiness/article/details/106741956
+
+https://www.51cto.com/article/712745.html
+
+https://support.huaweicloud.com/bestpractice-ecs/ecs_bp_0081.html
+
+​	   利用 Keepalived 实现 HAProxy 的热备。即两台主机上的两个HAProxy实例同时在线，其中权重较高的实例为MASTER，MASTER出现问题时，另一台实例自动接管所有流量。
+
+​	   具体原理，在两台 HAProxy 的主机上分别运行着一个 Keepalived 实例，两个 Keepalived 同时争抢同一个 VIP，两个 HAProxy 也尝试去绑定这同一个 VIP上的端口。Keepalived内部维护一个权重值，权重值最高的Keepalived实例能够抢到 VIP，成为 MASTER。同时Keepalived会定期check本主机上的HAProxy状态，状态OK时权重值增加。
 
 ```bash
 ## 主/备上安装 Keepalived
@@ -198,7 +210,7 @@ vrrp_script chk_haproxy {
 #虚拟路由配置
 vrrp_instance VI_1 {
     state MASTER           # 本机实例状态，MASTER/BACKUP，备机配置文件中请写BACKUP
-    interface eno1      #本机网卡名称，使用 ip a 命令查看
+    interface eno1         # 本机网卡名称，使用 ip a 命令查看
     virtual_router_id 51   # 虚拟路由编号，主备机保持一致
     priority 101           # 本机初始权重，备机请填写小于主机的值（例如100）
     advert_int 1           # 争抢虚地址的周期，秒

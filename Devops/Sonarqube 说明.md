@@ -2,7 +2,7 @@
 
 ### 1.Sonarqube是什么 
 
-​	SonarQube能够提供对代码的一整套检查扫描和分析功能，拥有一套服务器端程序，然后再通过客户端或者别的软件的插件的形式完成对各开发环境和软件的支持。	
+​	SonarQube能够提供对代码的一整套检查扫描和分析功能，拥有一套服务器端程序，然后再通过客户端或者以别的软件的插件形式完成对各开发环境和软件的支持。	
 
 - 对编程语言的支持非常广泛，包括C、C++、Java、Objective C、Python、JavaScript、PHP、C#、Swift、Erlang、Groovy等众多语言
 - 提供了对HTML、CSS、JSON、XML、CSV、SQL、JSP/JSF等类型的文档的支持
@@ -10,134 +10,141 @@
 - 登录认证方式支持LDAP、Bitbucket、Azure Active Directory（AAD）、Crowd等方式
 - 提供了优美的3D视图方式下查看代码分析和测试结果报告
 
+<img src="./images/sonar.webp" alt="sonar" style="zoom:80%;" />
+
 ### 2. 安装
 
-- 安装jdk1.8+
+#### SonarQube
 
-- 安装mysql5.x+，数据集必须配置为UTF8字符集，并且操作对象也是区分大小写的，并且仅支持InnoDB存储引擎，不支持MyISAM存储引擎。
+​	操作系统： `Centos7.6`、`SonarQube9.9`、`Sonar-Scanner-4.8`
 
-  **创建数据库**
+​	JRE：`SonarQube 17、Scanner11+`
 
-  ```sql
-  -- 1. 创建SonarQube Server数据库
-  CREATE DATABASE sonar CHARACTER SET utf8 COLLATE utf8_general_ci;
-  -- 2. 创建SonarQube Server访问数据库的用户
-  CREATE USER 'sonar' IDENTIFIED BY 'sonar';
-  -- 3. 配置SonarQube Server访问数据库用户的权限
-  GRANT ALL ON sonar.* TO 'sonar'@'%' IDENTIFIED BY 'sonar';
-  GRANT ALL ON sonar.* TO 'sonar'@'localhost' IDENTIFIED BY 'sonar';
-  flush privileges;
-  ```
+​	数据库：`PostgreSQL11+（UTF-8 编码）`
 
-  ​
+​	系统配置：
 
-- 安装sonarqube
+```bash
+sysctl -w vm.max_map_count=524288
+sysctl -w fs.file-max=131072
+ulimit -n 131072
+ulimit -u 8192
 
-  1. 下载sonarqube
-     https://www.sonarqube.org/downloads/
+## 修改elasticsearch配置参数
+vi /etc/sysctl.conf
+vm.max_map_count=262144
+## 执行命令
+sysctl -p
+## 修改最大文件数
+vi /etc/security/limits.conf
+## 末尾行添加
+* soft nofile 65535
+* hard nofile 65535
+```
 
-  2. 配置数据库
-     ​        SonarQube目录下的conf/sonar.properties文件，配置它的数据库连接，启用和配置。
+(1) 下载并解压
 
-   ```shell
-   sonar.jdbc.username=snoar
-   sonar.jdbc.password=sonar
-   sonar.jdbc.url=jdbc:mysql://localhost:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance
-   ```
+- 下载Sonar，地址：https://www.sonarsource.com/products/sonarqube/downloads/
 
-  3. 启动
+- 解压，本例中解压到 `/usr/local/sonar/server`
 
-   进入bin/macosx-universal-64，执行命令启动，访问
+(2) 创建用户
 
-   http://localhost:9000（默认：`admin/admin`）
+SonarQube 不能以 root 用户启动，所以要先创建用户
 
-   ```sh
-   nohup ./sonar.sh start 
-   { console | start | stop | restart | status | dump }
-   ```
+``` sh
+useradd sonar
+passwd sonar
+chown -R sonar /usr/local/sonar/server
+```
 
-  4. Sonar配置文件（sonar.properties）
+(3) 安装Postgres
 
-  | 属性             | 说明        |
-  | -------------- | --------- |
-  | sonar.web.host | 访问域名／IP地址 |
-  | sonar.web.port | 访问端口      |
-  |                |           |
+从SonarQube 7.9开始，不在支持MySQL（性能无法支撑），支持的数据库变为：Oracle、Microsoft SQL Server和PostgreSQL。
 
-  5. 安装插件
+创建数据库 sonar
 
-     汉化插件
+(4) 修改配置
 
-     ```
-     下载sonar-l10n-zh-plugin-1.15.jar后，
-     https://github.com/SonarQubeCommunity/sonar-l10n-zh 
+`sonar.properties`
 
-     放到
-     SonarQube/sonarqube-6.3.1/extensions/plugins 下，重启Sonar
-     ```
+```properties
+sonar.jdbc.username=postgres
+sonar.jdbc.password=123456
+sonar.jdbc.url=jdbc:postgresql://localhost:5432/sonarqube?currentSchema=public
 
-     其他插件
+## 端口修改
+sonar.web.host=0.0.0.0
+sonar.web.port=9000
+```
 
-     ```
-     配置 -> 更新中心 -> Available
-     ```
+`sonar.sh`
 
+```sh
+## 当JAVA_HOME中不是17+版本
+SONAR_JAVA_PATH="/usr/local/java17/bin/java"
 
-###3. Sonar Scanner
+# 设置内存
+XMS="-Xms8m"
+XMX="-Xmx32m"
+```
 
-​	SonarQube实际上是一个web系统，展现静态代码扫描的结果（可以自定义），真正进行扫描的是 Sonar Scanner 工具。
+`elasticsearch/jvm.options`
 
-1. 安装
-   - 下载适合自己系统的工具
-     https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner
+```sh
+-Xms2g
+-Xmx2g
+```
 
-   - 修改对应的SonarQube Server，*<install_directory>*/conf/sonar-scanner.properties*
+(5) 启动
 
-     ```properties
-     #----- Default SonarQube server
-     #sonar.host.url=http://localhost:9000
-     ```
+```sh
+## 在/usr/local/sonar/server下
+./bin/linux-x86-64/sonar.sh start
+tail -f logs/sonar.log
+```
 
-   - 将 *<install_directory>/bin* 加入到PATH中
+启动成功后，访问：http://localhost:9000 ，进行配置
 
-2. 使用
+#### Sonar-Scanner
 
-   - 在要进行检查的Project的根目录创建文件：==*sonar-project.properties*==，内容如下：
+下载，https://docs.sonarqube.org/9.9/analyzing-source-code/scanners/sonarscanner
 
-   ```properties
-   # must be unique in a given SonarQube instance
-   sonar.projectKey=my:project
-   # this is the name and version displayed in the SonarQube UI. Was mandatory prior to SonarQube 6.1.
-   sonar.projectName=My project
-   sonar.projectVersion=1.0
-    
-   # Path is relative to the sonar-project.properties file. Replace "\" by "/" on Windows.
-   # This property is optional if sonar.modules is set. 
-   sonar.sources=.
-    
-   # Encoding of the source code. Default is default system encoding
-   sonar.sourceEncoding=UTF-8
-   ```
+解压，本例中解压到 `/usr/local/sonar/scanner`
 
-   - 在根目录运行
+将`bin/sonar-scanner`加入到系统`PATH`中
 
-   ```sh
-   sonar-scanner
-   ```
+#### 项目配置
 
+在项目的根目录中创建`sonar-project.properties`，内容如下
 
+```properties
+sonar.projectKey=risun-rsp
+sonar.projectName=\u777F\u9633RSP\u6846\u67B6
+sonar.projectVersion=1.0
+sonar.sources=.
+sonar.sourceEncoding=UTF-8
+sonar.java.binaries=./project-admin/target/classes
+```
 
+### 3. 集成Jenkins
 
-### 4. 与Jenkins联合使用 
+(1) 安装SonarQube插件
 
-在Jenkins中安装和使用SonarQube的先决条件
+<img src="./images/sonar-scanner.png" alt="sonar-scanner" style="zoom:0%;" />
 
-- 安装SonarQube插件 ，插件管理中添加。
+- 创建密钥
 
+  <img src="./images/sonartoken.png" alt="sonartoken" style="zoom: 50%;" />
 
-- 配置Sonar
+- 配置
 
-  ![Sonar-Jenkins](./Sonar-Jenkins.png)
+  <img src="./images/sonarserver.png" alt="sonarserver" style="zoom: 50%;" />
+
+- Scanner（Global Tool Configuration）
+
+  <img src="./images/scanner.png" alt="scanner" style="zoom: 50%;" />
+
 
 - 在pipeline中使用（项目中有sonar-project.properties）
 
@@ -147,10 +154,13 @@
       git 'https://github.com/foo/bar.git'
     }
     stage('SonarQube analysis') {
-      // requires SonarQube Scanner 2.8+
-      def scannerHome = tool 'SonarQube Scanner 2.8';
-      withSonarQubeEnv('My SonarQube Server') {
-        sh "${scannerHome}/bin/sonar-scanner"
+      stage('静态代码扫描') {
+        def scannerHome = tool 'SonarScanner 4';
+        withSonarQubeEnv('SonarQube') {
+            sh """
+                ${scannerHome}/bin/sonar-scanner
+            """
+        }
       }
     }
   }
@@ -181,9 +191,14 @@
     brew install https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64
     ```
 
+### 4. SonarWeb使用
 
-### 5. Sonar系统使用
+​	https://blog.csdn.net/LANNY8588/article/details/108428135
 
-#### 1）用户、权限
+### 5. 参考资料
 
-参考：https://blog.csdn.net/danielchan2518/article/details/72792897
+- https://docs.sonarqube.org/9.9
+- https://www.devopsschool.com/blog/how-to-execute-sonarqube-scanner-using-jenkins-pipeline
+- https://blog.csdn.net/danielchan2518/article/details/72792897
+- https://www.jianshu.com/p/81e616f4c625
+- https://blog.csdn.net/jiatong151/article/details/111995890

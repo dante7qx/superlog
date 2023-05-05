@@ -1,6 +1,6 @@
 ## MySQL安装 Windows解压版
 
-### 一 下载
+### 一. 下载
 
 - 1 进入官网，下载
 
@@ -17,7 +17,7 @@ Download
 
 https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.18-winx64-debug-test.zip
 
-### 二 安装
+### 二. 安装
 
 - 1 解压安装包
 

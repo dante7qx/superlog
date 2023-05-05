@@ -49,3 +49,20 @@ select * from (
 ### 3. 递归查询
 
 https://blog.csdn.net/xubenxismile/article/details/107662209
+
+### 4. 创建用户、授权
+
+```sql
+use mysql;
+
+create database testDB default charset utf8mb4 collate utf8mb4_general_ci;
+
+CREATE USER 'hzyingjiju'@'localhost' IDENTIFIED BY 'Risun8768!';
+CREATE USER 'hzyingjiju'@'%' IDENTIFIED BY 'Risun8768!';
+
+grant all privileges on testDB.* to 'hzyingjiju'@'localhost' IDENTIFIED BY 'Risun8768!';
+
+grant all privileges on testDB.* to 'hzyingjiju'@'%' IDENTIFIED BY 'Risun8768!';
+
+```
+
