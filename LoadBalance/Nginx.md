@@ -1,6 +1,87 @@
 ## Nginx
 
-### 一. 安装 - MAC
+### 一. 安装 
+
+#### 1.Centos7+
+
+```bash
+cd /opt
+wget https://nginx.org/download/nginx-1.24.0.tar.gz
+tar -zxvf nginx-1.24.0.tar.gz
+yum -y install pcre-devel openssl openssl-devel
+cd nginx-1.24.0
+./configure --with-http_stub_status_module --with-http_ssl_module
+make install
+
+## 一般安装在 /usr/local/nginx下
+rm -rf /opt/nginx*
+ln -s /usr/local/nginx/sbin/nginx /sbin/nginx
+
+## 配置 systemd 服务
+cd /usr/lib/systemd/system
+touch nginx.service
+chmod +x nginx.service
+
+## 加入内容如下
+```
+
+- nginx.service
+
+```properties
+[Unit]
+# 服务描述
+Description=The nginx service that provide http and reverse proxy service
+# 配置 Nginx 服务在 network.target remote-fs.target 及 nss-lookup.target 都启动过后才会启动
+# network.target remote-fs.target 及 nss-lookup.target 即使启动失败，也不影响 Nginx 服务启动
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+# Fork 模式启动进程
+Type=forking
+# 提供一个进程ID文件供 systemd 确定要监管的 Nginx 服务进程的 ID
+# 根据规范，pid文件应该保存在 /run 文件夹下
+PIDFile=/run/nginx.pid
+# 启动前必须清理之前生成的 PID 文件
+ExecStartPre=/usr/bin/rm -f /run/nginx.pid
+# 启动前先检查 nginx 的 conf 文件语法是否正确
+ExecStartPre=/usr/local/nginx/sbin/nginx -t
+# 执行启动 nginx 的脚本
+ExecStart=/usr/local/nginx/sbin/nginx
+# 执行启动脚本后，要留一定的时间让 nginx 进程生成 PID 文件，因此挂起 0.5 秒
+ExecStartPost=/usr/bin/sleep 0.5
+# restart 服务的命令
+ExecReload=/bin/kill -s HUP $MAINPID
+# stop 服务时候，向进程发送的信号
+KillSignal=SIGQUIT
+KillMode=process
+PrivateTmp=true
+
+[Install]
+# 被 multi-user.target 依赖
+WantedBy=multi-user.target
+```
+
+- 修改 nginx.conf
+
+```nginx
+user  root;
+worker_processes  32;								## 服务器物理cpu数量
+pid        /run/nginx.pid;					## 和 nginx.service 中保持一致
+```
+
+- 使用
+
+```bash
+systemctl start nginx
+systemctl status nginx
+systemctl stop nginx
+systemctl restart nginx
+
+## 开机启动
+systemctl enable nginx
+```
+
+#### 2. Mac
 
 ```sh
 brew install nginx

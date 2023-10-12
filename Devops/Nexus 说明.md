@@ -516,10 +516,6 @@ pip install PyYAML==5.1.2
 
 #### 4. Maven仓库
 
-
-
-
-
 - 参考资料
   - https://wiki.eryajf.net/pages/45c5da/
   - https://www.toutiao.com/article/7088346410491412995/?traffic_source=&in_ogs=&utm_source=&source=search_tab&utm_medium=wap_search&original_source=&in_tfs=&channel=&enter_keyword=nexus%E4%B8%8B%E8%BD%BD%E5%85%A8%E9%83%A8%E4%BB%A3%E7%A0%81&source=m_redirect

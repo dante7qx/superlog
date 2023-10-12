@@ -66,3 +66,23 @@ grant all privileges on testDB.* to 'hzyingjiju'@'%' IDENTIFIED BY 'Risun8768!';
 
 ```
 
+### 5. mysql5迁移到8
+
+- 导出数据
+
+```sql
+mysqldump -u <username> -p <password> <database_name> > backup.sql
+```
+
+- 导入数据
+
+```sql
+mysql -u <username> -p <database_name> < backup.sql
+```
+
+- 注意事项
+  - 确保备份数据的完整性和一致性，尽量避免数据丢失。
+  - 在导入数据之前，先创建新版本的数据库，并确保数据库结构与旧版本相同。
+  - 确保应用程序和数据库之间的兼容性，特别是在数据库版本升级后。
+
+​	

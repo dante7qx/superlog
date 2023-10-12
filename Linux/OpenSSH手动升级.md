@@ -29,6 +29,8 @@ yum install -y tar gcc make
 curl -L -O --insecure https://nchc.dl.sourceforge.net/project/libpng/zlib/1.2.11/zlib-1.2.11.tar.gz
 curl -L -O --insecure https://mirrors.sonic.net/pub/OpenBSD/OpenSSH/portable/openssh-9.3p1.tar.gz
 curl -L -O --insecure https://www.openssl.org/source/openssl-1.1.1t.tar.gz
+## (或者)
+curl -L -O --insecure https://www.openssl.org/source/openssl-3.0.8.tar.gz
 ```
 
 ### 四. 解压并安装
@@ -48,6 +50,7 @@ cd openssl-1.1.1t
 ./config --prefix=/usr/local/ssl -d shared
 make && make install
 echo '/usr/local/ssl/lib' >> /etc/ld.so.conf
+## 使修改后的/etc/ld.so.conf生效
 ldconfig -v
 
 cd openssh-9.3p1
@@ -57,8 +60,9 @@ make && make install
 
 ### 五. 删除低版本OpenSSH
 
-```
+```sh
 rpm -e --nodeps `rpm -qa | grep openssh`
+## 不要执行 rpm -e --nodeps `rpm -qa | grep openssl`
 ```
 
 ### 六. 修改配置
@@ -82,6 +86,7 @@ cp /usr/local/openssh/sbin/sshd /usr/sbin/sshd
 cp /usr/local/openssh/bin/ssh /usr/bin/ssh
 cp /usr/local/openssh/bin/ssh-keygen /usr/bin/ssh-keygen
 cp /usr/local/openssh/etc/ssh_host_ecdsa_key.pub /etc/ssh/ssh_host_ecdsa_key.pub
+cp /usr/local/ssl/bin/openssl /usr/bin/
 ```
 
 ### 八. 启动sshd服务
@@ -92,8 +97,12 @@ systemctl start sshd
 systemctl status sshd
 
 ssh -V
+openssl version -a
 
 ## 开启防火墙
 systemctl start firewalld
 ```
 
+### 参看资料：
+
+- centos.pkgs.org/7/centos-x86_64/fontconfig-2.13.0-4.3.el7.x86_64.rpm.html

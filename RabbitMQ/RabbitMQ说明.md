@@ -18,9 +18,9 @@
 
     ```shell
     cd otp_src_20.2
-
+    
     ./configure --prefix=/usr/local/erlang --with-ssl --enable-threads --enable-smmp-support --enable-kernel-poll --enable-hipe --without-javac
-
+    
     ## 参数说明
     # --prefix 指定安装目录
     # --with-ssl  支持加密通信ssl
@@ -29,17 +29,17 @@
     # --enable-kernel-poll   启用Linux内核poll
     # --enable-hipe   启用高性能Erlang
     # --without-javac
-
+    
     ## 编译、安装
     make && make install
-
+    
     ## 添加环境变量
     vim /etc/profile
     ERLANG_HOME=/usr/local/erlang
     PATH=$ERLANG_HOME/bin:$PATH
     export ERLANG_HOME
     export PATH
-
+    
     source /etc/profile
     ## 测试
     erl
@@ -54,26 +54,26 @@
     ```shell
     tar -xvf rabbitmq-server-generic-unix-3.6.14.tar.xz 
     cd rabbitmq_server-3.6.14/
-
+    
     ## 添加环境变量
     vim /etc/profile
     RABBITMQ_HOME=/opt/rabbitmq_server-3.6.14
     PATH=$RABBITMQ_HOME/sbin:$PATH
     export PATH
-
+    
     ## Web管理插件
     rabbitmq-plugins enable rabbitmq_management
     ## 启动
     rabbitmq-server -detached
     ## 关闭
     rabbitmqctl stop
-
+    
     ## 管理用户
     rabbitmqctl delete_user guest
     rabbitmqctl add_user admin admin123
     rabbitmqctl set_user_tags  admin administrator 
     ## 访问 http://localhost:15672   admin/admin123
-
+    
     ## 开启防火墙端口 5672、15672
     firewall-cmd --zone=public --add-port=5672/tcp --permanent
     firewall-cmd --zone=public --add-port=15672/tcp --permanent
@@ -180,12 +180,12 @@
    ./rabbitmq1/sbin/rabbitmq-server -detached
    ./rabbitmq2/sbin/rabbitmq-server -detached
    ./rabbitmq3/sbin/rabbitmq-server -detached
-
+   
    ## 通过 cluster_status 验证
    ./rabbitmq1/sbin/rabbitmqctl cluster_status
    ./rabbitmq2/sbin/rabbitmqctl cluster_status
    ./rabbitmq3/sbin/rabbitmqctl cluster_status
-
+   
    ## 创建集群
    ## 停止rabbit2@localhost应用，加入rabbit1@localhost集群，重启rabbit2 application
    ./rabbitmq2/sbin/rabbitmqctl stop_app
@@ -194,12 +194,12 @@
    ## ==> Clustering node rabbit2@localhost with rabbit1@localhost
    ./rabbitmq2/sbin/rabbitmqctl start_app
    ## ==> Starting node rabbit2@localhost
-
+   
    ## 将rabbit3@localhost，加入rabbit2@localhost集群
    ./rabbitmq3/sbin/rabbitmqctl stop_app
    ./rabbitmq3/sbin/rabbitmqctl join_cluster rabbit2@localhost
    ./rabbitmq3/sbin/rabbitmqctl start_app
-
+   
    ## 查看rabbit1的集群状态
    ./rabbitmq1/sbin/rabbitmqctl cluster_status
    ## ==> Cluster status of node rabbit1@localhost
@@ -701,4 +701,3 @@ public class TopicExchangeListener {
 - http://www.cnblogs.com/wangdaijun/p/7920716.html
 - https://docs.spring.io/spring-amqp/docs/1.7.5.RELEASE/reference/html/_reference.html
 - https://docs.spring.io/spring-boot/docs/1.5.9.RELEASE/reference/htmlsingle/#boot-features-amqp
-

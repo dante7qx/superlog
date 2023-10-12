@@ -47,6 +47,9 @@ redis-server &
 
 # 指定配置文件启动，生产环境
 redis-server /<path>/redis.conf
+
+# 停止
+ps -ef | grep redis | grep -v grep | awk '{print $2}' | xargs kill -9
 ```
 
 ### 三. 配置
@@ -618,7 +621,7 @@ cluster-require-full-coverage yes
   redis-server 7003/redis.conf 
   redis-server 7004/redis.conf 
   redis-server 7005/redis.conf
-
+  
   ## 启动日志，9c51289598cc09025fb00b1f2be22b1bb11c3e0e 称为 Node ID, 唯一不变。
   42713:M 29 Oct 16:39:49.286 * No cluster configuration found, I'm 9c51289598cc09025fb00b1f2be22b1bb11c3e0e
   ```
@@ -903,7 +906,11 @@ spring:
       max-redirects: 3 # Node调转次数（实际可以看做是重试次数）
 ```
 
-### 八. 参考资料
+### 八. 常见问题
+
+- http://m.54php.cn/default/257.html
+
+### 九. 参考资料
 
 - http://redis.io/
 - https://redis.io/topics/sentinel

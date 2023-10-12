@@ -100,6 +100,8 @@
 * Linux
   - [Tcpdump](Linux/Tcpdump 命令.md)
   - [Shell](Linux/Shell 命令.md)
+  - [虚拟内存](Linux/虚拟内存.md)
+  - [OpenSSH手动升级](Linux/OpenSSH手动升级.md)
 
 - 入、出
   - [谢尽铅华](诗/谢尽铅华.md)

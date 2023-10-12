@@ -15,15 +15,32 @@
 
 **使用chown命令可以修改文件或目录所属的用户：**
 
-​	chown 用户 目录或文件名
+​	`chown 用户 目录或文件名`
 
 **使用chgrp命令可以修改文件或目录所属的组：**
 
-​	chgrp 组 目录或文件名
+​	`chgrp 组 目录或文件名`
 
 **文件读、写、执行权限**
 
-​	chmod u+x file
+​	`chmod u+x file`
+
+#### 4. Watch命令
+
+周期性地运行其他命令并实时显示输出结果
+
+```bash
+## Monitor files in the current directory:
+    watch ls
+
+## Monitor disk space and highlight the changes:
+    watch -d df
+
+## Monitor "node" processes, refreshing every 3 seconds:
+    watch -n 3 "ps aux | grep node"
+```
+
+
 
 ### 二. 参考
 
