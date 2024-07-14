@@ -343,6 +343,10 @@ git branch -d feature-apt
 
 `git push origin --delete brt2`
 
+#### 同步远程已删除的分支和删除本地多余的分支
+
+参考：https://www.cnblogs.com/saysmy/p/9166331.html
+
 #### 变基和合并（rebase、merge）
 
 待续？？？

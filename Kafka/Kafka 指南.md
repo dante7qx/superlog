@@ -98,13 +98,15 @@
 
   **Producer客户端自己控制着消息被推送到哪些partition。**实现的方式可以是随机分配、实现一类随机负载均衡算法，或者指定一些分区算法。Kafka提供了接口供用户实现自定义的partition，用户可以为每个消息指定一个partitionKey，通过这个key来实现一些hash分区算法。比如，把userid作为partitionkey的话，相同userid的消息将会被推送到同一个partition。
 
-- 异步发送
+- 异步发送（https://blog.csdn.net/li1325169021/article/details/130048738）
 
   通常producer在发送完消息之后会得到一个future响应，返回的是offset值或者发送过程中遇到的错误。这其中有个非常重要的参数“acks”,这个参数决定了producer要求leader partition 收到确认的副本个数。
 
   - acks=0：表示producer不会等待broker的响应，所以，producer无法知道消息是否发送成功，这样有可能会导致数据丢失，但同时，acks值为0会得到最大的系统吞吐量。
   - acks=1：表示producer会在leader partition收到消息时得到broker的一个确认，这样会有更好的可靠性，因为客户端会等待直到broker确认收到消息。
   - acks=-1：producer会在所有备份的partition收到消息时得到broker的确认，这个设置可以得到最高的可靠性保证。
+  
+  <img src="./ack.png" alt="ack" style="zoom:67%;" />
 
 #### 4. 消费者
 
@@ -112,6 +114,8 @@ Kafka提供了两套consumer api，分为high-level api和sample-api。
 
 - sample-api：一个底层的API，它维持了一个和单一broker的连接，并且这个API是完全无状态的，每次请求都需要指定offset值，因此，这套API也是最灵活的。
 - high-level api：封装了对集群中一系列broker的访问，可以透明的消费一个topic。它自己维持了已消费消息的状态，即每次消费的都是下一个消息。
+
+<img src="./消费.png" alt="消费" style="zoom:80%;" />
 
 ### 二. 安装
 
@@ -162,6 +166,10 @@ Kafka提供了两套consumer api，分为high-level api和sample-api。
   需要将已收集的流数据提供给其他流式计算框架进行处理，用Kafka收集流数据是一个不错的选择，而且当前版本的Kafka提供了Kafka Streams支持对流数据的处理。
 
 ### 八. 参考资料
+
+- 原理
+  - https://www.bilibili.com/video/BV1eg411g7s3?p=12&spm_id_from=pageDriver&vd_source=8f8723e88e8663a6bcb99752b7dc866c
+  - https://blog.csdn.net/h952520296/article/details/134373902?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-134373902-blog-134207728.235^v43^pc_blog_bottom_relevance_base7&spm=1001.2101.3001.4242.1&utm_relevant_index=3
 
 - Docker：
 
