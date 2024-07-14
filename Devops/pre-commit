@@ -1,0 +1,15 @@
+#!/bin/sh
+
+REPOS="$1"
+TXN="$2"
+SVNLOOK=/usr/bin/svnlook
+
+envSetting="env LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8"
+MSG=`$envSetting $SVNLOOK log -t "$TXN" "$REPOS"`
+MSG_LEN=`python -c "import sys; print len(sys.argv[1].decode(\"UTF-8\"))" "$MSG"`
+
+if [ "$MSG_LEN" -lt 6 ];
+then
+  echo -e "\nCommit failed: The commit description cannot be less than 6 characters!" 1>&2
+  exit 1
+fi
